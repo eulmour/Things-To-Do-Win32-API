@@ -83,7 +83,7 @@ INT_PTR CALLBACK FindFirst(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
                     nmh.hwndFrom = hDlg;
                     SendMessage(GetParent(hDlg), WM_NOTIFY, IDC_LIST, (LPARAM)&nmh);
                 }
-                delete sEditCtrlText;
+                delete[] sEditCtrlText;
             }
 
             //TODO: Implement search logic

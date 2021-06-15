@@ -49,8 +49,10 @@ class BaseWindow
 {
 protected:
 
-    HWND m_hWnd;
+    HWND m_hWnd, m_hMainThread;
     WindowClass* m_pClass;
+    std::vector<ListView*> m_aListViewList;
+
     virtual LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
     void Register(WindowClass* pClass) { m_pClass = pClass; }
 
@@ -81,7 +83,7 @@ protected:
     }
 
 public:
-    BaseWindow() : m_hWnd(nullptr), m_pClass(nullptr) { }
+    BaseWindow() : m_hWnd(nullptr), m_hMainThread(nullptr), m_pClass(nullptr) { }
 
     BOOL Create(
         int nTitleId,
@@ -113,6 +115,8 @@ public:
             m_pClass->wcex.hInstance,
             this
         );
+
+        m_hMainThread = static_cast<HWND>(OpenThread(THREAD_ALL_ACCESS, FALSE, GetCurrentThreadId()));
 
         //MessageBox(m_hWnd, GetErrorMessage(GetLastError()).c_str(), TEXT("Warning"), MB_OK | MB_ICONINFORMATION);
 
@@ -156,5 +160,18 @@ public:
     INT_PTR Box(int resource, DLGPROC ptr)
     {
         return CreateDialog(m_pClass->instance->hInstance, MAKEINTRESOURCE(resource), m_hWnd, ptr);
+    }
+
+    void Append(auto* const control)
+    {
+        control->Create(this->m_hWnd);
+    }
+
+    void AppendList(auto* const control, DWORD dwView = NULL)
+    {
+        this->m_aListViewList.push_back(control);
+        control->Create(this->m_hWnd);
+        control->SetStyle(dwView);
+        control->Post(m_hWnd);
     }
 };

@@ -3,7 +3,7 @@
   <assemblyIdentity
       version="1.0.0.0"
       processorArchitecture="*"
-      name="com.wetwater.thingstodo"
+      name="com.wetwater.ThingsToDo"
       type="win32"
 />
   <description>Your application description here.</description>

@@ -24,7 +24,7 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ThingsToDo.h">
+    <ClInclude Include="ThingsToDo (old).h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MainWindow.h">
@@ -41,7 +41,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ThingsToDo.cpp">
+    <ClCompile Include="ThingsToDo (old).cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MainWindow.cpp">
@@ -52,7 +52,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="ThingsToDo.rc">
+    <ResourceCompile Include="ThingsToDo (old).rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
@@ -60,12 +60,12 @@
     <Image Include="small.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="ThingsToDo.ico">
+    <Image Include="ThingsToDo (old).ico">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="ThingsToDo.exe.manifest">
+    <Manifest Include="ThingsToDo (old).exe.manifest">
       <Filter>Resource Files</Filter>
     </Manifest>
   </ItemGroup>
