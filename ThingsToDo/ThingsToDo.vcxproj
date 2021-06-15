@@ -73,7 +73,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
