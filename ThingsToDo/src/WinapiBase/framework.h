@@ -24,14 +24,14 @@
 // Windows Header Files
 #include <windows.h>
 #include <commctrl.h>
+#include <commdlg.h>
+#include <ShlObj.h>
+#include <Shlwapi.h>
 
-#include "Utils.h"
-
-//#include <Commdlg.h>
-//#include <Shlobj.h>
 //#include <shobjidl.h>
 //#include <atlbase.h>
 
-//#include "Shlwapi.h"
+
+#include "Utils.h"
 
 #define ZeroStruct(s) RtlSecureZeroMemory(&s, sizeof(s))

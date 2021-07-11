@@ -40,10 +40,10 @@ public:
         wcex.hInstance =    instance.hInstance;
 
         //Must be overwritten
-        wcex.hIcon =            LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_COLLECTION));
+        wcex.hIcon =            LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_THINGSTODO));
         wcex.hCursor =          LoadCursor(nullptr, IDC_ARROW);
         wcex.hbrBackground =    (HBRUSH)(COLOR_WINDOW + 1);
-        wcex.lpszMenuName =     MAKEINTRESOURCEW(IDC_COLLECTION);
+        wcex.lpszMenuName =     MAKEINTRESOURCEW(IDC_THINGSTODO);
         wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
         this->instance = &instance;
     }
@@ -80,7 +80,7 @@ public:
     virtual void Create(HWND hParent)
     {
         hWnd = CreateWindow(sClassName.c_str(), sText.c_str(), dwStyle, m_Pos.x, m_Pos.y, m_Pos.width, m_Pos.height, hParent, (HMENU)wId, nullptr, nullptr);
-        SendMessage(hWnd, WM_SETFONT, WPARAM(font), TRUE); // Set default font
+        //SendMessage(hWnd, WM_SETFONT, WPARAM(font), TRUE); // Set default font
     }
 
     virtual void Post(HWND hParent) {}
@@ -132,20 +132,13 @@ public:
         DWORD*      pdwColumnWidth,
         WORD        wId = NULL,
         DWORD       dwStyle = WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SINGLESEL | WS_BORDER)
-      : IControl(L"SysListView32", L"", pos, NULL, dwStyle),
+      : IControl(L"SysListView32", L"", pos, wId, dwStyle),
         cColumns(cCount),
         cRows(0),
         pszColumnDesc(pszColumnDesc),
         pdwColumnWidth(pdwColumnWidth)
     {
     }
-
-    struct ListViewRow
-    {
-        BOOL bChecked;
-        DWORD dwColor;
-        std::vector<std::wstring> aTextFields;
-    };
 
     void Post(HWND hParent) override
     {
@@ -161,6 +154,8 @@ public:
             lvc.pszText = const_cast<LPWSTR>(pszColumnDesc[dwIndex]);
 
             ListView_InsertColumn(hWnd, dwIndex, &lvc);
+
+            aCols.push_back(pszColumnDesc[dwIndex]);
         }
     }
 
@@ -172,6 +167,7 @@ public:
     BOOL OnNotify(LPARAM lParam)
     {
         NMLVDISPINFO* plvdi = (NMLVDISPINFO*)lParam;
+        dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
         TCHAR temp_buffer[256] = L"";
         std::wstringstream ss;
 
@@ -193,7 +189,6 @@ public:
 
             if (!m_bPreventEdit)
             {
-                dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);  // get selected item
                 plvdi->item.iSubItem = 0;     // we get the item only (change for sub)
                 plvdi->item.pszText = temp_buffer;   // text type
 
@@ -204,15 +199,34 @@ public:
             m_bPreventEdit = false;
             break;
 
+        case LVN_ITEMCHANGED:
+        {
+            LPNMLISTVIEW pNMLV = (LPNMLISTVIEW)lParam;
+
+            if (pNMLV->uChanged & LVIF_STATE && pNMLV->uOldState)
+            {
+                switch (pNMLV->uNewState & LVIS_STATEIMAGEMASK)
+                {
+                case 0x2000: /*checked*/
+                    aRows[pNMLV->iItem].bChecked = true;
+                    break;
+                case 0x1000: /*unchecked*/
+                    aRows[pNMLV->iItem].bChecked = false;
+                    break;
+                }
+            }
+        }
+
+            break;
+
         case LVM_DELETEALLITEMS:
 
             ListView_DeleteAllItems(hWnd);
             aRows.clear();
+            cRows = 0;
             break;
 
         case NM_DBLCLK:
-
-            dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
 
             if (dwSelected == -1)
             {
@@ -230,24 +244,10 @@ public:
 
             break;
 
-        case NM_CLICK:
-
-            dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
-            break;
-
         case NM_RETURN:
 
-            dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
             ListView_EditLabel(hWnd, dwSelected);
             break;
-
-        //case LM_DO_FINDFIRST:
-        //    MessageBeep(MB_OK);
-        //    break;
-        //case LM_DO_EDITCANCEL:
-        //    m_bPreventEdit = true;
-        //    ListView_CancelEditLabel(m_hEditLabel);
-        //    break;
         }
 
         return 0;
@@ -277,7 +277,6 @@ public:
 
         lvI.pszText = LPSTR_TEXTCALLBACK; // Sends an LVN_GETDISPINFO message.
         lvI.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
-        lvI.stateMask = 0;
         lvI.iSubItem = 0;
         lvI.state = 0;
 
@@ -299,7 +298,28 @@ public:
 
         return TRUE;
     }
+
+    void DeleteItem()
+    {
+        dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
+
+        if (dwSelected == -1)
+            return;
+
+        ListView_DeleteItem(hWnd, dwSelected);
+        aRows.erase(aRows.begin() + dwSelected);
+    }
+
+    void Clear()
+    {
+        ListView_DeleteAllItems(hWnd);
+        aRows.clear();
+        cRows = 0;
+    }
+
     WORD GetId() { return wId; }
+    std::vector<ListViewRow>& GetData() { return aRows; }
+    std::vector<std::wstring>& GetHeader() { return aCols; }
 
 private:
 
@@ -307,6 +327,7 @@ private:
     LPCWSTR* pszColumnDesc;
     DWORD* pdwColumnWidth;
     std::vector<ListViewRow> aRows;
+    std::vector<std::wstring> aCols;
 
     DWORD dwSelected = -1;
     HWND m_hEditLabel = nullptr;

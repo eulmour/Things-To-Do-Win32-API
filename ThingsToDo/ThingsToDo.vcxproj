@@ -81,11 +81,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\res;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\res;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -99,7 +99,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -118,7 +118,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -133,7 +133,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,22 +152,23 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Comctl32.lib;Shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\WinapiBase\Base.h" />
     <ClInclude Include="src\WinapiBase\BaseWindow.h" />
     <ClInclude Include="src\ThingsToDo.h" />
     <ClInclude Include="src\WinapiBase\framework.h" />
     <ClInclude Include="src\MainWindow.h" />
-    <ClInclude Include="src\WinapiBase\Resource.h" />
     <ClInclude Include="src\WinapiBase\targetver.h" />
     <ClInclude Include="src\WinapiBase\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ThingsToDo.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
+    <ClCompile Include="src\WinapiBase\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\ThingsToDo.rc" />
