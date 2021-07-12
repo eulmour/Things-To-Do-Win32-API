@@ -73,19 +73,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\res;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\WinapiBase;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\res;C:\Users\Wahaja\source\repos\ThingsToDo\ThingsToDo\src\ListCtrl;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
