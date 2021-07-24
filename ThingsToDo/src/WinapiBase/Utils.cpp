@@ -187,8 +187,8 @@ HANDLE HandleFile(LPCWSTR lpPath, BOOL bSave)
     {
         hFile = CreateFileW(
             lpPath,
-            GENERIC_WRITE,
-            FILE_SHARE_READ,
+            GENERIC_WRITE | GENERIC_READ,
+            FILE_SHARE_WRITE | FILE_SHARE_READ,
             NULL,
             CREATE_ALWAYS,
             FILE_ATTRIBUTE_NORMAL,

@@ -18,8 +18,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
     int iScreenWidth = GetSystemMetrics(SM_CXSCREEN);
     int iScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-    int iWindowWidth = iScreenWidth / 3;
-    int iWindowHeight = iScreenHeight / 2;
+    int iWindowWidth = 800;
+    int iWindowHeight = 600;
     int iWindowLeft = (iScreenWidth / 2) - (iWindowWidth / 2);
     int iWindowTop = (iScreenHeight / 2) - (iWindowHeight / 2);
 

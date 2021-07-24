@@ -84,21 +84,28 @@ public:
     }
 
     virtual void Post(HWND hParent) {}
-
     virtual BOOL Show(BOOL bShow) { return ShowWindow(hWnd, bShow); }
-
-    virtual BOOL Move(int x, int y, int nWidth, int nHeight, BOOL bRepaint) { return MoveWindow(hWnd, x, y, nWidth, nHeight, bRepaint); }
-
     virtual BOOL Enable(BOOL bEnable) { return EnableWindow(hWnd, bEnable); }
 
-    virtual HWND Window() { return hWnd ? hWnd : throw std::runtime_error("Error: control wasn't assigned to the window"); }
+    virtual BOOL Move(int x, int y, int nWidth, int nHeight, BOOL bRepaint)
+    {
+        return MoveWindow(hWnd, x, y, nWidth, nHeight, bRepaint);
+    }
 
-    virtual operator HWND() { return this->hWnd; };
+    virtual HWND Window()
+    {
+        return hWnd ? hWnd : throw std::runtime_error("Error: control wasn't assigned to the window");
+    }
+    
+    operator HWND()
+    {
+        return hWnd ? hWnd : throw std::runtime_error("Error: control wasn't assigned to the window");
+    };
 
 protected:
     std::wstring    sClassName, sText;
     Position        m_Pos;
-    WORD           wId = { 0 };
+    WORD            wId = { 0 };
     DWORD           dwStyle;
     HWND            hWnd = nullptr;
     HFONT           font = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
@@ -237,7 +244,7 @@ public:
             for (size_t i = 0; i < cColumns; ++i)
             {
                 ListView_GetItemText(hWnd, dwSelected, static_cast<int>(i), temp_buffer, 256);
-                ss << temp_buffer << "\n";
+                ss << temp_buffer << "\n\n";
             }
 
             MessageBox(GetParent(hWnd), ss.str().c_str(), TEXT("Item"), MB_OK);
