@@ -3,6 +3,8 @@
 #include "framework.h"
 #include "resource.h"
 
+#define LM_SELECTALL (WM_USER + 0x0300)
+
 struct Instance
 {
     Instance(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPWSTR lpCmdLine, int nCmdShow)
@@ -174,10 +176,7 @@ public:
     BOOL OnNotify(LPARAM lParam)
     {
         NMLVDISPINFO* plvdi = (NMLVDISPINFO*)lParam;
-        dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
-        TCHAR temp_buffer[256] = L"";
-        std::wstringstream ss;
-
+        
         switch (((LPNMHDR)lParam)->code)
         {
 
@@ -193,6 +192,8 @@ public:
             break;
 
         case LVN_ENDLABELEDIT:
+        {
+            TCHAR temp_buffer[256] = L"";
 
             if (!m_bPreventEdit)
             {
@@ -204,11 +205,13 @@ public:
                 this->aRows[dwSelected].aTextFields[0] = temp_buffer;
             }
             m_bPreventEdit = false;
-            break;
+        }
+        break;
 
         case LVN_ITEMCHANGED:
         {
             LPNMLISTVIEW pNMLV = (LPNMLISTVIEW)lParam;
+            dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
 
             if (pNMLV->uChanged & LVIF_STATE && pNMLV->uOldState)
             {
@@ -223,8 +226,7 @@ public:
                 }
             }
         }
-
-            break;
+        break;
 
         case LVM_DELETEALLITEMS:
 
@@ -233,22 +235,18 @@ public:
             cRows = 0;
             break;
 
+        case LM_SELECTALL:
+
+            for (int i = 0; i < cRows; ++i)
+            {
+                ListView_SetItemState(hWnd, i, LVIS_SELECTED, 0x00f);
+            }
+
+            break;
+
         case NM_DBLCLK:
 
-            if (dwSelected == -1)
-            {
-                MessageBox(GetParent(hWnd), TEXT("No items in list"), TEXT("Error"), MB_OK | MB_ICONINFORMATION);
-                break;
-            }
-
-            for (size_t i = 0; i < cColumns; ++i)
-            {
-                ListView_GetItemText(hWnd, dwSelected, static_cast<int>(i), temp_buffer, 256);
-                ss << temp_buffer << "\n\n";
-            }
-
-            MessageBox(GetParent(hWnd), ss.str().c_str(), TEXT("Item"), MB_OK);
-
+            PostMessage(GetParent(hWnd), NF_MSG , 0x1401 /* Main list */, dwSelected);
             break;
 
         case NM_RETURN:
@@ -308,13 +306,16 @@ public:
 
     void DeleteItem()
     {
-        dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_FOCUSED);
+        while (true)
+        {
+            dwSelected = ListView_GetNextItem(hWnd, -1, LVNI_SELECTED);
 
-        if (dwSelected == -1)
-            return;
+            if (dwSelected == -1)
+                return;
 
-        ListView_DeleteItem(hWnd, dwSelected);
-        aRows.erase(aRows.begin() + dwSelected);
+            aRows.erase(aRows.begin() + dwSelected);
+            ListView_DeleteItem(hWnd, dwSelected);
+        }
     }
 
     void Clear()
@@ -336,7 +337,8 @@ private:
     std::vector<ListViewRow> aRows;
     std::vector<std::wstring> aCols;
 
-    DWORD dwSelected = -1;
+    LONG dwSelected = -1;
+    LONG dwOpSelected = -1;
     HWND m_hEditLabel = nullptr;
     BOOL m_bPreventEdit = false;
 

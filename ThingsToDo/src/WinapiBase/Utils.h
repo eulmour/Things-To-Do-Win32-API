@@ -27,3 +27,5 @@ void            WriteRow        (DWORD dwColor, BOOL bChecked, std::vector<std::
 void            ReadTextFromFile(std::vector<std::wstring>& aTextFields, OVERLAPPED& ol, HANDLE hFile);
 void            ReadRowFromFile(std::vector<ListViewRow>& aRows, DWORD dwSize, OVERLAPPED& ol, HANDLE hFile);
 HANDLE          HandleFile(LPCWSTR lpPath, BOOL bSave);
+const wchar_t*  GetTime();
+std::basic_string<TCHAR> GetLastErrorMessage();

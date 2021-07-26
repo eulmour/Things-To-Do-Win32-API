@@ -1,10 +1,20 @@
 ﻿#include "MainWindow.h"
 
+namespace
+{
+    HWND hMainWindow    = nullptr;
+    HWND hListView      = nullptr;
+    HWND hEditText      = nullptr;
+    HWND hColorBox      = nullptr;
+
+    DWORD   listViewStyle = WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_EDITLABELS;
+    LPCWSTR pszColumnNames[2] = { L"Note", L"Modified" };
+    DWORD   pdwColumnsWidth[2] = { 700, 120 };
+    ListView listView = { { 0, 0, 516, 559 }, 2, pszColumnNames, pdwColumnsWidth, ID_MAIN_LIST, listViewStyle };
+} // end of anonimous namespace
+
 void MainWindow::InitWindowControls()
 {
-    //mainWindow->Append(&button1);
-    //mainWindow->Append(&label1);
-
     AppendList(&listView, LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
     SetFocus(listView);
 }
@@ -54,7 +64,7 @@ void MainWindow::ResizeList()
     }
 
     GetClientRect(listView, &rect);
-    ListView_SetColumnWidth(listView, 0, rect.right - nOffset);
+    ListView_SetColumnWidth(listView, 0, static_cast<DWORD>(rect.right) - nOffset);
 
     HWND parent = GetParent(listView);
     GetClientRect(parent, &rect);
@@ -68,7 +78,6 @@ INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     switch (message)
     {
     case WM_INITDIALOG:
-
         return (INT_PTR)TRUE;
 
     case WM_COMMAND:
@@ -82,6 +91,97 @@ INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
+INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam /*Item index*/)
+{
+    static int iItemIndex;
+
+    static struct ColorInfo
+    {
+        LPCWSTR name;
+        DWORD color;
+    } colors[11] =
+    {
+        { TEXT("None"),          0xFFFFFF },
+        { TEXT("Red"),           0xFF0000 },
+        { TEXT("Dark red"),      0x770000 },
+        { TEXT("Gray"),          0x888888 },
+        { TEXT("Blue"),          0x1133FF },
+        { TEXT("Dark blue"),     0x000088 },
+        { TEXT("Orange"),        0xFFFFFF },
+        { TEXT("Purple"),        0xFFFFFF },
+        { TEXT("Silver"),        0xFFFFFF },
+        { TEXT("Olive"),         0xFFFFFF },
+        { TEXT("Green"),         0xFFFFFF }
+    };
+
+    switch (message)
+    {
+    case WM_INITDIALOG:
+    {
+        iItemIndex = static_cast<int>(lParam);
+
+        TCHAR temp_buffer[256] = L"";
+        std::wstringstream ss;
+
+        hEditText = GetDlgItem(hDlg, IDC_EDIT_TEXT);
+        SetFocus(hEditText);
+
+        if (iItemIndex == -1)
+        {
+            MessageBox(GetParent(hDlg), TEXT("No items in list"), TEXT("Error"), MB_OK | MB_ICONINFORMATION);
+            break;
+        }
+
+        ListView_GetItemText(hListView, iItemIndex, 0 /*col*/, temp_buffer, 256);
+        ss << temp_buffer /* << "\r\n" */;
+
+        Edit_SetText(hEditText, ss.str().c_str());
+
+        hColorBox = GetDlgItem(hDlg, IDC_COMBO_COLOR);
+
+        for (int  k = 0; k <= 10; ++k)
+        {
+            SendMessage(hColorBox, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)colors[k].name);
+        }
+
+        ComboBox_SetCurSel(hColorBox, 0);
+
+        return (INT_PTR)TRUE;
+    }
+
+    case WM_COMMAND:
+
+        if (LOWORD(wParam) == IDCANCEL)
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+
+        if (LOWORD(wParam) == IDOK)
+        {
+            TCHAR temp_buffer[256] = L"";
+
+            GetWindowTextW(hEditText, temp_buffer, 256);
+            listView.GetData().at(iItemIndex).aTextFields.at(0) = temp_buffer;
+            listView.GetData().at(iItemIndex).dwColor = colors[iItemIndex].color;
+
+            ListView_SetItemText(hListView, iItemIndex, 0, temp_buffer);
+
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+
+        if (HIWORD(wParam) == CBN_SELCHANGE)
+        {
+            int ItemIndex = ComboBox_GetCurSel(hColorBox);
+            return (INT_PTR)TRUE;
+        }
+
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
 LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
@@ -90,11 +190,14 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         INITCOMMONCONTROLSEX icex;
         icex.dwICC = ICC_LISTVIEW_CLASSES;
+        icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
         InitCommonControlsEx(&icex);
         InitWindowControls();
         InitFileHierarchy();
+        hMainWindow = m_hWnd;
+        hListView = listView;
 
-        //MessageBox(m_hWnd, GetErrorMessage(GetLastError()).c_str(), TEXT("Error"), MB_OK | MB_ICONERROR);
+        /*MessageBox(m_hWnd, GetErrorMessage(GetLastError()).c_str(), TEXT("Error"), MB_OK | MB_ICONERROR);*/
         break;
     }
 
@@ -139,13 +242,39 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             break;
 
+        case ID_EDIT_CUT: /* TODO cut item */
+
+        {
+            DWORD dwSelected = ListView_GetNextItem(listView, -1, LVNI_SELECTED);
+
+            if (dwSelected == -1)
+                break;
+
+            ListView_DeleteItem(listView, dwSelected);
+        }
+
+            break;
+
+        case ID_EDIT_COPY: /* TODO copy item */
+
+
+
+            break;
+
+        case ID_EDIT_PASTE: /* TODO paste item */
+
+
+
+            break;
+
+        case ID_EDIT_SELECTALL:
+
+            SendListViewMessage(m_hWnd, ID_MAIN_LIST, LM_SELECTALL);
+
+            break;
         case ID_EDIT_INSERTNEW:
         {
-            SYSTEMTIME st = { 0 };
-            GetLocalTime(&st);
-            wchar_t cTimeStr[32];
-            swprintf_s(cTimeStr, L"%02d/%02d/%d %02d:%02d:%02d", st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond);
-            listView.AddRow<0xFFFFFF, FALSE>(L"", (const wchar_t*)cTimeStr);
+            listView.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
             listView.UpdateList();
             break;
         }
@@ -198,6 +327,12 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_DESTROY:
         PostQuitMessage(0);
+        break;
+
+    case NF_MSG:
+        if (wParam == ID_MAIN_LIST)
+            //LoadLibrary(TEXT("Riched20.dll"));
+            Dialog(IDD_VIEW_ENTRY, ViewEntry, lParam);
         break;
 
     default:

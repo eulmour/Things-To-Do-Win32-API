@@ -203,3 +203,40 @@ HANDLE HandleFile(LPCWSTR lpPath, BOOL bSave)
 
     return hFile;
 }
+
+const wchar_t* GetTime()
+{
+    static wchar_t cTimeStr[32];
+
+    SYSTEMTIME st = { 0 };
+    GetLocalTime(&st);
+    swprintf_s(cTimeStr, L"%02d/%02d/%d %02d:%02d:%02d", st.wDay, st.wMonth, st.wYear, st.wHour, st.wMinute, st.wSecond);
+
+    return &cTimeStr[0];
+}
+
+std::basic_string<TCHAR> GetLastErrorMessage()
+{
+    LPTSTR psz = NULL;
+    const DWORD cchMsg = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
+        | FORMAT_MESSAGE_IGNORE_INSERTS
+        | FORMAT_MESSAGE_ALLOCATE_BUFFER,
+        NULL, // (not used with FORMAT_MESSAGE_FROM_SYSTEM)
+        GetLastError(),
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        reinterpret_cast<LPTSTR>(&psz),
+        0,
+        NULL);
+    if (cchMsg > 0)
+    {
+        // Assign buffer to smart pointer with custom deleter so that memory gets released
+        // in case String's c'tor throws an exception.
+        auto deleter = [](void* p) { ::HeapFree(::GetProcessHeap(), 0, p); };
+        std::unique_ptr<TCHAR, decltype(deleter)> ptrBuffer(psz, deleter);
+        return std::basic_string<TCHAR>(ptrBuffer.get(), cchMsg);
+    }
+    else
+    {
+        throw std::runtime_error("Failed to retrieve error message string.");
+    }
+}
