@@ -1,30 +1,24 @@
 #pragma once
 #include <framework.h>
+#include "resource.h"
 
 template <class DERIVED_TYPE>
 class BaseDialog
 {
 protected:
 
-	HWND hWnd;
     virtual INT_PTR OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
 
-    static INT_PTR WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    static inline INT_PTR WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
-        DERIVED_TYPE* pThis = NULL;
+        static DERIVED_TYPE* pThis = NULL;
 
         if (uMsg == WM_INITDIALOG)
         {
-            CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
-            pThis = (DERIVED_TYPE*)pCreate->lpCreateParams;
-            SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)pThis);
-
+            pThis = reinterpret_cast<DERIVED_TYPE*>(lParam);
             pThis->hWnd = hWnd;
         }
-        else
-        {
-            pThis = (DERIVED_TYPE*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-        }
+
         if (pThis)
         {
             return pThis->OnMessage(uMsg, wParam, lParam);
@@ -36,10 +30,20 @@ protected:
     }
 
 public:
-    BaseDialog() : m_hWnd(nullptr) { }
+    BaseDialog() : hWnd(), iId() { }
 
-    BOOL Create(int resource)
+    constexpr void Create()
     {
-        DialogBox(m_pClass->instance->hInstance, MAKEINTRESOURCE(resource), GetParent(hWnd), DERIVED_TYPE::OnMessage);
+        hWnd = CreateDialogParamW(
+            GetModuleHandle(NULL),
+            MAKEINTRESOURCE(iId),
+            NULL,
+            DERIVED_TYPE::WindowProc,
+            (LPARAM)reinterpret_cast<DERIVED_TYPE*>(this));
+
+        ShowWindow(hWnd, 10);
     }
+
+	HWND hWnd;
+    int iId;
 };
