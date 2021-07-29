@@ -9,6 +9,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     //Instance instance(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
+    INITCOMMONCONTROLSEX icex;
+    icex.dwICC = ICC_LISTVIEW_CLASSES;
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    InitCommonControlsEx(&icex);
+
     Main2Window mainWindow(IDD_DIALOG_MAIN);
     mainWindow.Create();
 

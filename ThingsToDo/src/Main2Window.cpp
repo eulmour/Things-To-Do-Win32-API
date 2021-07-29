@@ -7,15 +7,14 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
     case WM_INITDIALOG:
     {
-        INITCOMMONCONTROLSEX icex;
-        icex.dwICC = ICC_LISTVIEW_CLASSES;
-        icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
-        InitCommonControlsEx(&icex);
+        InitCommonControls();
         InitWindowControls();
         InitFileHierarchy();
 
-        //When list view would be initialized you must set this:
-        //SetWindowLongPtr(listView, GWLP_USERDATA, (LONG_PTR)&listView);
+        SendMessage(hDlg, WM_SETICON, (WPARAM)1, (LPARAM)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SMALL)));
+
+        ShowWindow(hDlg, SW_NORMAL);
+        UpdateWindow(hDlg);
 
         return (INT_PTR)TRUE;
     }
@@ -111,6 +110,9 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_NOTIFY:
     {
+        if (((LPNMHDR)lParam)->code == LVN_BEGINLABELEDIT)
+            MessageBeep(MB_OK);
+
         if (noteList.GetId() == LOWORD(wParam))
         {
             LPNMLISTVIEW pnm = (LPNMLISTVIEW)lParam;
@@ -129,12 +131,12 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_PAINT:
     {
-        PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(hDlg, &ps);
+        //PAINTSTRUCT ps;
+        //HDC hdc = BeginPaint(hDlg, &ps);
 
-        EndPaint(hDlg, &ps);
+        //EndPaint(hDlg, &ps);
 
-        return (INT_PTR)TRUE;
+        return (INT_PTR)0;
     }
 
     case WM_SIZE:
@@ -219,8 +221,7 @@ void Main2Window::ResizeList()
     GetClientRect(noteList, &rect);
     ListView_SetColumnWidth(noteList, 0, static_cast<DWORD>(rect.right) - nOffset);
 
-    HWND parent = GetParent(noteList);
-    GetClientRect(parent, &rect);
+    GetClientRect(hDlg, &rect);
     MoveWindow(noteList, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 }
 

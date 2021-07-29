@@ -129,23 +129,26 @@ BOOL NoteList::UpdateList()
     LVITEM lvI;
     ZeroStruct(lvI);
 
-    //lvI.pszText = LPSTR_TEXTCALLBACK; // Sends an LVN_GETDISPINFO message.
+    lvI.pszText = LPSTR_TEXTCALLBACK; // Sends an LVN_GETDISPINFO message.
+    //lvI.pszText = (LPWSTR)aRows[index].aTextFields[column].c_str();
     lvI.cchTextMax = 256;
     lvI.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
-    lvI.iSubItem = 0;
     lvI.state = 0;
+    lvI.iSubItem = 0;
 
     int iNewRowCount = static_cast<int>(aRows.size());
 
+    /* vertical (rows) */
     for (int index = this->cRows; index < iNewRowCount; ++index)
     {
-        lvI.pszText = (LPWSTR)aRows[index].aTextFields[0].c_str();
         lvI.iItem = index;
         lvI.iImage = index;
+
 
         // Insert items into the list.
         if (ListView_InsertItem(hWnd, &lvI) == -1)
             return FALSE;
+
         // Set checkbox checked
         ListView_SetCheckState(hWnd, index, aRows[index].bChecked);
     }

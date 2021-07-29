@@ -34,7 +34,7 @@ public:
 
     constexpr void Create()
     {
-        DialogBoxParam(
+        hDlg = CreateDialogParam(
             GetModuleHandle(NULL),
             MAKEINTRESOURCE(iId),
             NULL,
