@@ -1,12 +1,8 @@
 ﻿#include "MainWindow.h"
+#include "Modal.h"
 
 namespace
 {
-    HWND hMainWindow    = nullptr;
-    HWND hListView      = nullptr;
-    HWND hEditText      = nullptr;
-    HWND hColorBox      = nullptr;
-
     DWORD   listViewStyle = WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_EDITLABELS;
     LPCWSTR pszColumnNames[2] = { L"Note", L"Modified" };
     DWORD   pdwColumnsWidth[2] = { 700, 120 };
@@ -39,13 +35,13 @@ void MainWindow::InitFileHierarchy()
         // if file isn't found create it
         if (!FileExists(szCurrentFilePath))
         {
-            SendMessage(m_hWnd, WM_COMMAND, ID_FILE_SAVE, NULL);
+            SendMessage(hWnd, WM_COMMAND, ID_FILE_SAVE, NULL);
             return;
         }
 
         m_hFile = HandleFile(sCurrentFilePath.c_str(), FALSE);
 
-        if (_ReadComplexFromFile() == S_FALSE) MessageBox(m_hWnd, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
+        if (ReadDataFromFile() == S_FALSE) MessageBox(hWnd, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
         listView.UpdateList();
 
     }
@@ -71,118 +67,9 @@ void MainWindow::ResizeList()
     MoveWindow(listView, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 }
 
-INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    UNREFERENCED_PARAMETER(lParam);
 
-    switch (message)
-    {
-    case WM_INITDIALOG:
-        return (INT_PTR)TRUE;
 
-    case WM_COMMAND:
-        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam /*Item index*/)
-{
-    static int iItemIndex;
-
-    static struct ColorInfo
-    {
-        LPCWSTR name;
-        DWORD color;
-    } colors[11] =
-    {
-        { TEXT("None"),          0xFFFFFF },
-        { TEXT("Red"),           0xFF0000 },
-        { TEXT("Dark red"),      0x770000 },
-        { TEXT("Gray"),          0x888888 },
-        { TEXT("Blue"),          0x1133FF },
-        { TEXT("Dark blue"),     0x000088 },
-        { TEXT("Orange"),        0xFFFFFF },
-        { TEXT("Purple"),        0xFFFFFF },
-        { TEXT("Silver"),        0xFFFFFF },
-        { TEXT("Olive"),         0xFFFFFF },
-        { TEXT("Green"),         0xFFFFFF }
-    };
-
-    switch (message)
-    {
-    case WM_INITDIALOG:
-    {
-        iItemIndex = static_cast<int>(lParam);
-
-        TCHAR temp_buffer[256] = L"";
-        std::wstringstream ss;
-
-        hEditText = GetDlgItem(hDlg, IDC_EDIT_TEXT);
-        SetFocus(hEditText);
-
-        if (iItemIndex == -1)
-        {
-            MessageBox(GetParent(hDlg), TEXT("No items in list"), TEXT("Error"), MB_OK | MB_ICONINFORMATION);
-            break;
-        }
-
-        ListView_GetItemText(hListView, iItemIndex, 0 /*col*/, temp_buffer, 256);
-        ss << temp_buffer /* << "\r\n" */;
-
-        Edit_SetText(hEditText, ss.str().c_str());
-
-        hColorBox = GetDlgItem(hDlg, IDC_COMBO_COLOR);
-
-        for (int  k = 0; k <= 10; ++k)
-        {
-            SendMessage(hColorBox, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)colors[k].name);
-        }
-
-        ComboBox_SetCurSel(hColorBox, 0);
-
-        return (INT_PTR)TRUE;
-    }
-
-    case WM_COMMAND:
-
-        if (LOWORD(wParam) == IDCANCEL)
-        {
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-
-        if (LOWORD(wParam) == IDOK)
-        {
-            TCHAR temp_buffer[256] = L"";
-
-            GetWindowTextW(hEditText, temp_buffer, 256);
-            listView.GetData().at(iItemIndex).aTextFields.at(0) = temp_buffer;
-            listView.GetData().at(iItemIndex).dwColor = colors[iItemIndex].color;
-
-            ListView_SetItemText(hListView, iItemIndex, 0, temp_buffer);
-
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-
-        if (HIWORD(wParam) == CBN_SELCHANGE)
-        {
-            int ItemIndex = ComboBox_GetCurSel(hColorBox);
-            return (INT_PTR)TRUE;
-        }
-
-        break;
-    }
-    return (INT_PTR)FALSE;
-}
-
-LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT MainWindow::OnMessage(HWND hHandle, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
     switch (uMsg)
     {
@@ -194,10 +81,7 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         InitCommonControlsEx(&icex);
         InitWindowControls();
         InitFileHierarchy();
-        hMainWindow = m_hWnd;
-        hListView = listView;
 
-        /*MessageBox(m_hWnd, GetErrorMessage(GetLastError()).c_str(), TEXT("Error"), MB_OK | MB_ICONERROR);*/
         break;
     }
 
@@ -210,40 +94,42 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
 
         case ID_FILE_NEW:
+        {
             listView.Clear();
             break;
+        }
 
         case ID_FILE_OPEN:
-
-            sCurrentFilePath = ShowFileDialog(L"Text files\0*.txt\0All files\0*.*\0", m_hWnd, FALSE);
+        {
+            sCurrentFilePath = ShowFileDialog(L"Text files\0*.txt\0All files\0*.*\0", hWnd, FALSE);
             SetTitle(sCurrentFilePath.c_str());
 
             m_hFile = HandleFile(sCurrentFilePath.c_str(), FALSE);
 
             listView.Clear();
-            if (_ReadComplexFromFile() == S_FALSE) MessageBox(m_hWnd, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
+            if (ReadDataFromFile() == S_FALSE) MessageBox(hWnd, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
             listView.UpdateList();
 
             break;
+        }
 
         case ID_FILE_SAVE:
-
+        {
             m_hFile = HandleFile(sCurrentFilePath.c_str(), TRUE);
-
-            if (_WriteComplexToFile() == S_FALSE) MessageBox(m_hWnd, L"Error while saving file", L"Error", MB_OK | MB_ICONERROR);
-
+            if (WriteDataToFile() == S_FALSE) MessageBox(hWnd, L"Error while saving file", L"Error", MB_OK | MB_ICONERROR);
             break;
+        }
 
         case ID_FILE_SAVEAS:
-
-            sCurrentFilePath = ShowFileDialog(L"Text files\0*.txt\0All files\0*.*\0", m_hWnd, TRUE);
+        {
+            sCurrentFilePath = ShowFileDialog(L"Text files\0*.txt\0All files\0*.*\0", hWnd, TRUE);
             SetTitle(sCurrentFilePath.c_str());
-            PostMessage(m_hWnd, WM_COMMAND, ID_FILE_SAVE, lParam);
+            PostMessage(hWnd, WM_COMMAND, ID_FILE_SAVE, lParam);
 
             break;
+        }
 
         case ID_EDIT_CUT: /* TODO cut item */
-
         {
             DWORD dwSelected = ListView_GetNextItem(listView, -1, LVNI_SELECTED);
 
@@ -251,9 +137,8 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
                 break;
 
             ListView_DeleteItem(listView, dwSelected);
-        }
-
             break;
+        }
 
         case ID_EDIT_COPY: /* TODO copy item */
 
@@ -268,10 +153,11 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case ID_EDIT_SELECTALL:
-
-            SendListViewMessage(m_hWnd, ID_MAIN_LIST, LM_SELECTALL);
-
+        {
+            SendListViewMessage(hWnd, ID_MAIN_LIST, LM_SELECTALL);
             break;
+        }
+
         case ID_EDIT_INSERTNEW:
         {
             listView.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
@@ -280,63 +166,86 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
 
         case ID_EDIT_DELETE:
+        {
             //TODO: delete selection
             listView.DeleteItem();
             break;
+        }
 
         case IDM_ABOUT:
+        {
             Dialog(IDD_ABOUTBOX, AboutBox);
             break;
+        }
 
         case IDM_EXIT:
-            DestroyWindow(m_hWnd);
+        {
+            DestroyWindow(hWnd);
             break;
+        }
 
         default:
-            return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+            return DefWindowProc(hWnd, uMsg, wParam, lParam);
         }
     }
     break;
 
     case WM_NOTIFY:
-
-        for (const auto& listView : m_aListViewList)
+    {
+        for (const auto& listView : aListViewList)
         {
             if (listView->GetId() == LOWORD(wParam))
+            {
+                LPNMLISTVIEW pnm = (LPNMLISTVIEW)lParam;
+
+                if (pnm->hdr.hwndFrom == *listView && pnm->hdr.code == NM_CUSTOMDRAW)
+                {
+                    SetWindowLongPtr(hHandle, 0, (LONG)ProcessCustomDraw(lParam, listView->dwSelected));
+                    break;
+                }
+
                 listView->OnNotify(lParam);
+            }
         }
 
         break;
+    }
 
     case WM_PAINT:
     {
         PAINTSTRUCT ps;
-        HDC hdc = BeginPaint(m_hWnd, &ps);
+        HDC hdc = BeginPaint(hWnd, &ps);
 
-        EndPaint(m_hWnd, &ps);
+        EndPaint(hWnd, &ps);
+        break;
     }
-    break;
 
     case WM_SIZE:
+    {
         ResizeList();
 
         if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
             ResizeList();
 
         break;
+    }
 
     case WM_DESTROY:
+    {
         PostQuitMessage(0);
         break;
+    }
 
     case NF_MSG:
+    {
         if (wParam == ID_MAIN_LIST)
-            //LoadLibrary(TEXT("Riched20.dll"));
-            Dialog(IDD_VIEW_ENTRY, ViewEntry, lParam);
+            Dialog(IDD_VIEW_ENTRY, ViewEntry, (LPARAM)&listView);
+
         break;
+    }
 
     default:
-        return DefWindowProc(m_hWnd, uMsg, wParam, lParam);
+        return DefWindowProc(hWnd, uMsg, wParam, lParam);
 
     }
     return 0;
@@ -346,10 +255,10 @@ void MainWindow::SetTitle(LPCWSTR lpText)
 {
     WCHAR temp[256];
     swprintf_s(temp, L"Things To Do - %s", lpText);
-    SetWindowText(m_hWnd, temp);
+    SetWindowText(hWnd, temp);
 }
 
-HRESULT MainWindow::_WriteComplexToFile()
+HRESULT MainWindow::WriteDataToFile()
 {
     DWORD nBytesWritten = 0UL;
 
@@ -399,7 +308,7 @@ HRESULT MainWindow::_WriteComplexToFile()
     return S_OK;
 }
 
-HRESULT MainWindow::_ReadComplexFromFile()
+HRESULT MainWindow::ReadDataFromFile()
 {
     OVERLAPPED ol = { 0 };
     ol.Offset = 0;

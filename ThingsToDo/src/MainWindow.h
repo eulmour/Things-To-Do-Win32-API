@@ -10,15 +10,15 @@ public:
         Register(wc);
     }
 
-    LRESULT OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam);
+    LRESULT OnMessage(HWND hHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 protected:
     void InitWindowControls();
     void InitFileHierarchy();
     void ResizeList();
     void SetTitle(LPCWSTR lpText);
-    HRESULT _WriteComplexToFile();
-    HRESULT _ReadComplexFromFile();
+    HRESULT WriteDataToFile();
+    HRESULT ReadDataFromFile();
 
     std::wstring sCurrentFilePath;
 

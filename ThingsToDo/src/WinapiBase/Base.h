@@ -18,18 +18,8 @@ struct Instance
     int nCmdShow;
 };
 
-class IWindowClass
+class WindowClass
 {
-public:
-    virtual ~IWindowClass() {}
-    virtual void SetClassName(int) = 0;
-    virtual void SetProc(WNDPROC) = 0;
-    virtual ATOM Register() = 0;
-
-    Instance* instance = nullptr;
-};
-
-class WindowClass : public IWindowClass{
 public:
 
     WindowClass(Instance& instance) : wcex({ 0 })
@@ -50,32 +40,32 @@ public:
         this->instance = &instance;
     }
 
-    void SetBackground(HBRUSH brush)    { wcex.hbrBackground = brush; }
-    void SetClassName(int resource) override
+    void SetClassName(int resource)
     {
         LoadString(GetModuleHandle(NULL), resource, m_sClassNameBuffer, 100);
         wcex.lpszClassName = m_sClassNameBuffer;
     }
-    void SetClassName(LPCWSTR sName) { wcex.lpszClassName = sName; }
+
+    void SetBackground(HBRUSH brush)    { wcex.hbrBackground = brush; }
+    void SetClassName(LPCWSTR sName)    { wcex.lpszClassName = sName; }
     void SetCursor(LPWSTR resource)     { wcex.hCursor = LoadCursor(nullptr, resource); }
     void SetIcon(int resource)          { wcex.hIcon = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(resource)); }
     void SetIconSmall(int resource)     { wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(resource)); }
     void SetMenu(int resource)          { wcex.lpszMenuName = MAKEINTRESOURCE(resource); }
-    void SetProc(WNDPROC ptr) override  { wcex.lpfnWndProc = ptr; }
-    virtual ATOM Register() override    { return RegisterClassEx(&wcex); }
+    void SetProc(WNDPROC ptr)           { wcex.lpfnWndProc = ptr; }
+    virtual ATOM Register()             { return RegisterClassEx(&wcex); }
 
     TCHAR m_sClassNameBuffer[100];
     TCHAR m_sMenuNameBuffer[100] = L"";
     WNDCLASSEX wcex;
+    Instance* instance = nullptr;
 };
 
 class IControl
 {
 public:
     IControl(LPCWSTR lpClassName, LPCWSTR lpWindowName, Position pos, WORD wId, DWORD dwStyle)
-        : sClassName(lpClassName), sText(lpWindowName), m_Pos(pos), wId(wId), dwStyle(dwStyle)
-    {
-    }
+        : sClassName(lpClassName), sText(lpWindowName), m_Pos(pos), wId(wId), dwStyle(dwStyle) { }
 
     virtual ~IControl() {}
 
@@ -85,18 +75,12 @@ public:
         //SendMessage(hWnd, WM_SETFONT, WPARAM(font), TRUE); // Set default font
     }
 
-    virtual void Post(HWND hParent) {}
     virtual BOOL Show(BOOL bShow) { return ShowWindow(hWnd, bShow); }
     virtual BOOL Enable(BOOL bEnable) { return EnableWindow(hWnd, bEnable); }
 
     virtual BOOL Move(int x, int y, int nWidth, int nHeight, BOOL bRepaint)
     {
         return MoveWindow(hWnd, x, y, nWidth, nHeight, bRepaint);
-    }
-
-    virtual HWND Window()
-    {
-        return hWnd ? hWnd : throw std::runtime_error("Error: control wasn't assigned to the window");
     }
     
     operator HWND()
@@ -149,7 +133,7 @@ public:
     {
     }
 
-    void Post(HWND hParent) override
+    void Post(HWND hParent)
     {
         SetWindowLongPtr(hWnd, GWLP_USERDATA, cColumns);
 
@@ -272,8 +256,6 @@ public:
         {
             aRows.back().aTextFields.push_back(x);
         }
-
-        //SendApcRequest()
     }
 
     BOOL UpdateList()
@@ -337,20 +319,11 @@ private:
     std::vector<ListViewRow> aRows;
     std::vector<std::wstring> aCols;
 
-    LONG dwSelected = -1;
     LONG dwOpSelected = -1;
     HWND m_hEditLabel = nullptr;
     BOOL m_bPreventEdit = false;
 
-    static VOID NTAPI ApcCallback(ULONG_PTR Parameter)
-    {
-        //TODO 123123123
-    }
+public:
 
-    void SendApcRequest(ListViewRow* pRow)
-    {
-        HWND hMainThread = static_cast<HWND>(OpenThread(THREAD_ALL_ACCESS, FALSE, GetCurrentThreadId()));
-        if (hMainThread && hMainThread != INVALID_HANDLE_VALUE)
-            QueueUserAPC(ApcCallback, hMainThread, (ULONG_PTR)pRow);
-    }
+    LONG dwSelected = -1;
 };

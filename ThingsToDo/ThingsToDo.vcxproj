@@ -156,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\Modal.h" />
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\WinapiBase\Base.h" />
     <ClInclude Include="src\WinapiBase\BaseWindow.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="src\WinapiBase\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Modal.cpp" />
     <ClCompile Include="src\ThingsToDo.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
     <ClCompile Include="src\WinapiBase\Utils.cpp" />
