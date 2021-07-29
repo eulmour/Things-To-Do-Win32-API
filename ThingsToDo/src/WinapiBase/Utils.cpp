@@ -240,3 +240,61 @@ std::basic_string<TCHAR> GetLastErrorMessage()
         throw std::runtime_error("Failed to retrieve error message string.");
     }
 }
+
+LRESULT ProcessCustomDraw(LPARAM lParam)
+{
+    LPNMLVCUSTOMDRAW lplvcd = (LPNMLVCUSTOMDRAW)lParam;
+
+    switch (lplvcd->nmcd.dwDrawStage)
+    {
+    case CDDS_PREPAINT: //Before the paint cycle begins
+        //request notifications for individual listview items
+        return CDRF_NOTIFYITEMDRAW;
+
+    case CDDS_ITEMPREPAINT: //Before an item is drawn
+        if (((int)lplvcd->nmcd.dwItemSpec % 2) == 0)
+        {
+            //customize item appearance
+            lplvcd->clrText = RGB(255, 0, 0);
+            lplvcd->clrTextBk = RGB(200, 200, 200);
+            return CDRF_NEWFONT;
+        }
+        else {
+            lplvcd->clrText = RGB(0, 0, 255);
+            lplvcd->clrTextBk = RGB(255, 255, 255);
+
+            return CDRF_NEWFONT;
+        }
+        break;
+
+        //Before a subitem is drawn
+    case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
+        if (0 /*TODO*/ == (int)lplvcd->nmcd.dwItemSpec)
+        {
+            if (0 == lplvcd->iSubItem)
+            {
+                //customize subitem appearance for column 0
+                lplvcd->clrText = RGB(255, 0, 0);
+                lplvcd->clrTextBk = RGB(255, 255, 255);
+
+                //To set a custom font:
+                //SelectObject(lplvcd->nmcd.hdc, 
+                //    <your custom HFONT>);
+
+                return CDRF_NEWFONT;
+            }
+            else if (1 == lplvcd->iSubItem)
+            {
+                //customize subitem appearance for columns 1..n
+                //Note: setting for column i 
+                //carries over to columnn i+1 unless
+                //      it is explicitly reset
+                lplvcd->clrTextBk = RGB(255, 0, 0);
+                lplvcd->clrTextBk = RGB(255, 255, 255);
+
+                return CDRF_NEWFONT;
+            }
+        }
+    }
+    return CDRF_DODEFAULT;
+}

@@ -7,7 +7,7 @@ class BaseDialog
 {
 protected:
 
-    virtual INT_PTR OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
+    virtual INT_PTR CALLBACK OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
 
     static inline INT_PTR DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
@@ -34,14 +34,12 @@ public:
 
     constexpr void Create()
     {
-        hDlg = CreateDialogParamW(
+        DialogBoxParam(
             GetModuleHandle(NULL),
             MAKEINTRESOURCE(iId),
             NULL,
             (DLGPROC)DERIVED_TYPE::DialogProc,
-            (LPARAM)reinterpret_cast<DERIVED_TYPE*>(this));
-
-        ShowWindow(hDlg, 10);
+            (LPARAM)this);
     }
 
 	HWND hDlg;

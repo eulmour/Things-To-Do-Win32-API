@@ -1,15 +1,12 @@
 #include "Main2Window.h"
 #include "Modal.h"
 
-INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-    UNREFERENCED_PARAMETER(lParam);
-
     switch (uMsg)
     {
     case WM_INITDIALOG:
     {
-        //SetMenu(hDlg, LoadMenu(GetModuleHandle(NULL), MAKEINTRESOURCE(IDC_THINGSTODO)));
         INITCOMMONCONTROLSEX icex;
         icex.dwICC = ICC_LISTVIEW_CLASSES;
         icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
@@ -18,7 +15,7 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         InitFileHierarchy();
 
         //When list view would be initialized you must set this:
-        SetWindowLongPtr(listView, GWLP_USERDATA, (LONG_PTR)&listView);
+        //SetWindowLongPtr(listView, GWLP_USERDATA, (LONG_PTR)&listView);
 
         return (INT_PTR)TRUE;
     }
@@ -29,23 +26,8 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         switch (wmId)
         {
-
-        case IDOK:
-        {
-            PostQuitMessage(0);
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-
-        case IDCANCEL:
-        {
-            PostQuitMessage(0);
-            EndDialog(hDlg, LOWORD(wParam));
-            return (INT_PTR)TRUE;
-        }
-
         case ID_FILE_NEW:
-            listView.Clear();
+            noteList.Clear();
             return (INT_PTR)TRUE;
 
         case ID_FILE_OPEN:
@@ -55,9 +37,9 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             hFile = HandleFile(sCurrentFilePath.c_str(), FALSE);
 
-            listView.Clear();
+            noteList.Clear();
             if (ReadDataFromFile() == S_FALSE) MessageBox(hDlg, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
-            listView.UpdateList();
+            noteList.UpdateList();
 
             return (INT_PTR)TRUE;
         }
@@ -73,12 +55,12 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case ID_EDIT_CUT: /* TODO cut item */
         {
-            DWORD dwSelected = ListView_GetNextItem(listView, -1, LVNI_SELECTED);
+            DWORD dwSelected = ListView_GetNextItem(noteList, -1, LVNI_SELECTED);
 
             if (dwSelected == -1)
                 return (INT_PTR)TRUE;
 
-            ListView_DeleteItem(listView, dwSelected);
+            ListView_DeleteItem(noteList, dwSelected);
             return (INT_PTR)TRUE;
         }
 
@@ -102,14 +84,14 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case ID_EDIT_INSERTNEW:
         {
-            listView.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
-            listView.UpdateList();
+            noteList.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
+            noteList.UpdateList();
             return (INT_PTR)TRUE;
         }
 
         case ID_EDIT_DELETE:
             //TODO: delete selection
-            listView.DeleteItem();
+            noteList.DeleteItem();
             return (INT_PTR)TRUE;
 
         case IDM_ABOUT:
@@ -119,9 +101,9 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case IDM_EXIT:
 
-            DestroyWindow(hDlg);
+            PostQuitMessage(0);
+            EndDialog(hDlg, NULL);
             return (INT_PTR)TRUE;
-
         }
 
         break;
@@ -129,10 +111,20 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_NOTIFY:
     {
-        if (listView.GetId() == LOWORD(wParam))
-            listView.OnNotify(lParam);
+        if (noteList.GetId() == LOWORD(wParam))
+        {
+            LPNMLISTVIEW pnm = (LPNMLISTVIEW)lParam;
 
-        return (INT_PTR)NULL;
+            if (pnm->hdr.hwndFrom == noteList && pnm->hdr.code == NM_CUSTOMDRAW)
+            {
+                SetWindowLongPtr(hDlg, 0, (LONG)ProcessCustomDraw(lParam));
+                return (INT_PTR)TRUE;
+            }
+
+            return (INT_PTR)noteList.OnNotify(lParam);
+        }
+
+        return (INT_PTR)FALSE;
     }
 
     case WM_PAINT:
@@ -151,7 +143,17 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
             ResizeList();
 
-        return (INT_PTR)NULL;
+        return (INT_PTR)TRUE;
+
+    case NF_MSG:
+    {
+        if (wParam == IDC_LIST_ENTRIES)
+        {
+            DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_VIEW_ENTRY), hDlg, ViewEntry, (LPARAM)&noteList);
+        }
+
+        break;
+    }
 
     case WM_CLOSE:
 
@@ -165,8 +167,9 @@ INT_PTR Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void Main2Window::InitWindowControls()
 {
-    listView.Init(hDlg);
-    listView.SetStyle(LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
+    noteList.Init(hDlg);
+    noteList.SetStyle(LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
+    SetFocus(noteList);
 }
 
 void Main2Window::InitFileHierarchy()
@@ -197,7 +200,7 @@ void Main2Window::InitFileHierarchy()
 
         if (ReadDataFromFile() == S_FALSE) MessageBox(hDlg, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
 
-        listView.UpdateList();
+        noteList.UpdateList();
     }
 }
 
@@ -206,19 +209,19 @@ void Main2Window::ResizeList()
     RECT rect;
     DWORD nOffset = 0;
 
-    for (size_t i = 0; i < listView.GetHeader().size(); ++i)
+    for (size_t i = 0; i < noteList.GetHeader().size(); ++i)
     {
         if (i == 0)
             continue;
         nOffset += pdwColumnsWidth[i];
     }
 
-    GetClientRect(listView, &rect);
-    ListView_SetColumnWidth(listView, 0, static_cast<DWORD>(rect.right) - nOffset);
+    GetClientRect(noteList, &rect);
+    ListView_SetColumnWidth(noteList, 0, static_cast<DWORD>(rect.right) - nOffset);
 
-    HWND parent = GetParent(listView);
+    HWND parent = GetParent(noteList);
     GetClientRect(parent, &rect);
-    MoveWindow(listView, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    MoveWindow(noteList, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 }
 
 void Main2Window::SetTitle(LPCWSTR lpText)
@@ -233,9 +236,9 @@ HRESULT Main2Window::WriteDataToFile()
     DWORD nBytesWritten = 0UL;
 
     // Columns
-    DWORD headerSize = static_cast<DWORD>(listView.GetHeader().size());
-    auto headerBegin = listView.GetHeader().begin();
-    auto headerEnd = listView.GetHeader().end();
+    DWORD headerSize = static_cast<DWORD>(noteList.GetHeader().size());
+    auto headerBegin = noteList.GetHeader().begin();
+    auto headerEnd = noteList.GetHeader().end();
 
     // 1. Write column count
     WriteFile(
@@ -254,9 +257,9 @@ HRESULT Main2Window::WriteDataToFile()
     }
 
     // Rows
-    DWORD count = static_cast<DWORD>(listView.GetData().size());
-    auto begin = listView.GetData().begin();
-    auto end = listView.GetData().end();
+    DWORD count = static_cast<DWORD>(noteList.GetData().size());
+    auto begin = noteList.GetData().begin();
+    auto end = noteList.GetData().end();
 
     // 1. Write row count
     WriteFile(
@@ -283,8 +286,8 @@ HRESULT Main2Window::ReadDataFromFile()
     OVERLAPPED ol = { 0 };
     ol.Offset = 0;
 
-    listView.GetHeader().clear();
-    listView.GetData().clear();
+    noteList.GetHeader().clear();
+    noteList.GetData().clear();
 
     DWORD dwColumnCount = 0;
     DWORD dwRowCount = 0;
@@ -318,7 +321,7 @@ HRESULT Main2Window::ReadDataFromFile()
     // 4. Read column names
     for (size_t i = 0; i < dwColumnCount; i++)
     {
-        ReadTextFromFile(listView.GetHeader(), ol, hFile);
+        ReadTextFromFile(noteList.GetHeader(), ol, hFile);
     }
 
     // 5. Get the row count
@@ -340,7 +343,7 @@ HRESULT Main2Window::ReadDataFromFile()
     // 8. Read row data
     for (size_t i = 0; i < dwRowCount; i++)
     {
-        ReadRowFromFile(listView.GetData(), dwColumnCount, ol, hFile);
+        ReadRowFromFile(noteList.GetData(), dwColumnCount, ol, hFile);
     }
 
     CloseHandle(hFile);

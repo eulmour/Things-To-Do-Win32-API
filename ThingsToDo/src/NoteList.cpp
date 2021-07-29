@@ -5,28 +5,26 @@ NoteList::NoteList(
     LPCWSTR* pszColumnDesc,
     DWORD* pdwColumnWidth,
     HWND hParent,
-    int iId,
-    DWORD dwStyle) :
+    int iId) :
+    hParent(hParent),
     cColumns(cCount),
     cRows(0),
     iId(iId),
     pszColumnDesc(pszColumnDesc),
-    pdwColumnWidth(pdwColumnWidth)
-{
-
-}
+    pdwColumnWidth(pdwColumnWidth) { }
 
 BOOL NoteList::Init(HWND hParent)
 {
     hWnd = GetDlgItem(hParent, iId);
     InitColumns();
+    //SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
     return hWnd == INVALID_HANDLE_VALUE ? false : true;
 }
 
 void NoteList::InitColumns()
 {
-    SetWindowLongPtr(hWnd, GWLP_USERDATA, cColumns);
+    //SetWindowLongPtr(hWnd, GWLP_USERDATA, cColumns);
 
     for (DWORD dwIndex = 0; dwIndex < cColumns; dwIndex++) {
         LVCOLUMN lvc;
@@ -80,8 +78,8 @@ BOOL NoteList::OnNotify(LPARAM lParam)
             this->aRows[dwSelected].aTextFields[0] = temp_buffer;
         }
         m_bPreventEdit = false;
+        break;
     }
-    break;
 
     case LVN_ITEMCHANGED:
     {
@@ -100,15 +98,8 @@ BOOL NoteList::OnNotify(LPARAM lParam)
                 break;
             }
         }
-    }
-    break;
-
-    case LVM_DELETEALLITEMS:
-
-        ListView_DeleteAllItems(hWnd);
-        aRows.clear();
-        cRows = 0;
         break;
+    }
 
     case LM_SELECTALL:
 
@@ -121,7 +112,7 @@ BOOL NoteList::OnNotify(LPARAM lParam)
 
     case NM_DBLCLK:
 
-        PostMessage(GetParent(hWnd), NF_MSG, 0x1401 /* Main list */, dwSelected);
+        PostMessage(GetParent(hWnd), NF_MSG, IDC_LIST_ENTRIES /* Main list */, dwSelected);
         break;
 
     case NM_RETURN:
@@ -136,8 +127,10 @@ BOOL NoteList::OnNotify(LPARAM lParam)
 BOOL NoteList::UpdateList()
 {
     LVITEM lvI;
+    ZeroStruct(lvI);
 
-    lvI.pszText = LPSTR_TEXTCALLBACK; // Sends an LVN_GETDISPINFO message.
+    //lvI.pszText = LPSTR_TEXTCALLBACK; // Sends an LVN_GETDISPINFO message.
+    lvI.cchTextMax = 256;
     lvI.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_STATE;
     lvI.iSubItem = 0;
     lvI.state = 0;
@@ -146,6 +139,7 @@ BOOL NoteList::UpdateList()
 
     for (int index = this->cRows; index < iNewRowCount; ++index)
     {
+        lvI.pszText = (LPWSTR)aRows[index].aTextFields[0].c_str();
         lvI.iItem = index;
         lvI.iImage = index;
 

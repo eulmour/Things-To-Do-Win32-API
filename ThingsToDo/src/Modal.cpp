@@ -1,4 +1,4 @@
-#include "WinapiBase/Base.h"
+#include "NoteList.h"
 #include "Modal.h"
 
 INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
@@ -23,11 +23,10 @@ INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
 INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam /* listview hwnd*/)
 {
-    static int iItemIndex;
+    static LONG iItemIndex = -1;
     static HWND hEditText = nullptr;
     static HWND hColorBox = nullptr;
-    static HWND hListView = (HWND)lParam; //getlongptr
-    static ListView* pListView = (ListView*)GetWindowLongPtr(hListView, GWLP_USERDATA);
+    static NoteList* pNoteList = nullptr;
 
     static struct ColorInfo
     {
@@ -52,7 +51,8 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     {
     case WM_INITDIALOG:
     {
-        iItemIndex = static_cast<int>(lParam);
+        pNoteList = reinterpret_cast<NoteList*>(lParam);
+        iItemIndex = pNoteList->dwSelected;
 
         TCHAR temp_buffer[256] = L"";
         std::wstringstream ss;
@@ -66,7 +66,7 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
             break;
         }
 
-        ListView_GetItemText(hListView, iItemIndex, 0 /*col*/, temp_buffer, 256);
+        ListView_GetItemText(*pNoteList, iItemIndex, 0 /*col*/, temp_buffer, 256);
         ss << temp_buffer /* << "\r\n" */;
 
         Edit_SetText(hEditText, ss.str().c_str());
@@ -96,10 +96,10 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
             TCHAR temp_buffer[256] = L"";
 
             GetWindowTextW(hEditText, temp_buffer, 256);
-            pListView->GetData().at(iItemIndex).aTextFields.at(0) = temp_buffer;
-            pListView->GetData().at(iItemIndex).dwColor = colors[iItemIndex].color;
+            pNoteList->GetData().at(iItemIndex).aTextFields.at(0) = temp_buffer;
+            pNoteList->GetData().at(iItemIndex).dwColor = colors[iItemIndex].color;
 
-            ListView_SetItemText(hListView, iItemIndex, 0, temp_buffer);
+            ListView_SetItemText(*pNoteList, iItemIndex, 0, temp_buffer);
 
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;

@@ -13,8 +13,7 @@ public:
         LPCWSTR*    pszColumnDesc,
         DWORD*      pdwColumnWidth,
         HWND        hParent,
-        int         iId = NULL,
-        DWORD       dwStyle = WS_VISIBLE | WS_CHILD | LVS_REPORT | LVS_SINGLESEL | WS_BORDER);
+        int         iId = NULL);
 
     BOOL OnNotify(LPARAM lParam);
 
@@ -46,9 +45,11 @@ public:
         }
     }
 
+    LONG dwSelected = -1;
+
 private:
 
-    HWND hWnd;
+    HWND hWnd, hParent;
     int iId;
     DWORD cColumns, cRows;
     LPCWSTR* pszColumnDesc;
@@ -56,7 +57,6 @@ private:
     std::vector<ListViewRow> aRows;
     std::vector<std::wstring> aCols;
 
-    LONG dwSelected = -1;
     HWND m_hEditLabel = nullptr;
     BOOL m_bPreventEdit = false;
 };
