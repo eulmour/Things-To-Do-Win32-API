@@ -73,19 +73,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;$(IncludePath);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;$(IncludePath);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -156,6 +156,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\NoteList.h" />
+    <ClInclude Include="src\Modal.h" />
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\Main2Window.h" />
     <ClInclude Include="src\WinapiBase\Base.h" />
@@ -168,6 +170,8 @@
     <ClInclude Include="src\WinapiBase\Utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\NoteList.cpp" />
+    <ClCompile Include="src\Modal.cpp" />
     <ClCompile Include="src\Main2Window.cpp" />
     <ClCompile Include="src\ThingsToDo.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />

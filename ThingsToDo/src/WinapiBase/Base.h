@@ -341,16 +341,4 @@ private:
     LONG dwOpSelected = -1;
     HWND m_hEditLabel = nullptr;
     BOOL m_bPreventEdit = false;
-
-    static VOID NTAPI ApcCallback(ULONG_PTR Parameter)
-    {
-        //TODO 123123123
-    }
-
-    void SendApcRequest(ListViewRow* pRow)
-    {
-        HWND hMainThread = static_cast<HWND>(OpenThread(THREAD_ALL_ACCESS, FALSE, GetCurrentThreadId()));
-        if (hMainThread && hMainThread != INVALID_HANDLE_VALUE)
-            QueueUserAPC(ApcCallback, hMainThread, (ULONG_PTR)pRow);
-    }
 };

@@ -9,23 +9,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     //Instance instance(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 
-    //WindowClass* mainWindowClass = new WindowClass(instance);
-    //mainWindowClass->SetClassName(IDC_THINGSTODO);
-    //mainWindowClass->SetCursor(IDC_ARROW);
-    //mainWindowClass->SetIcon(IDI_THINGSTODO);
-    //mainWindowClass->SetIconSmall(IDI_SMALL);
-    //mainWindowClass->SetMenu(IDC_THINGSTODO);
-
-    //int iScreenWidth = GetSystemMetrics(SM_CXSCREEN);
-    //int iScreenHeight = GetSystemMetrics(SM_CYSCREEN);
-    //int iWindowWidth = 800;
-    //int iWindowHeight = 600;
-    //int iWindowLeft = (iScreenWidth / 2) - (iWindowWidth / 2);
-    //int iWindowTop = (iScreenHeight / 2) - (iWindowHeight / 2);
-
-    //MainWindow* mainWindow = new MainWindow(mainWindowClass);
-    //mainWindow->Create(IDS_APP_TITLE, iWindowLeft, iWindowTop, iWindowWidth, iWindowHeight, WS_OVERLAPPEDWINDOW);
-
     Main2Window mainWindow(IDD_DIALOG_MAIN);
     mainWindow.Create();
 
@@ -35,7 +18,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Main message loop:
     while (GetMessage(&msg, nullptr, 0, 0))
     {
-        if (!TranslateAccelerator(mainWindow.hWnd, hAccelTable, &msg))
+        if (!TranslateAccelerator(mainWindow.hDlg, hAccelTable, &msg))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);

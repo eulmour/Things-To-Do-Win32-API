@@ -71,7 +71,7 @@ void MainWindow::ResizeList()
     MoveWindow(listView, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 }
 
-INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK AboutBox2(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
 
@@ -91,7 +91,7 @@ INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam /*Item index*/)
+INT_PTR CALLBACK ViewEntry2(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam /*Item index*/)
 {
     static int iItemIndex;
 
@@ -285,7 +285,7 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             break;
 
         case IDM_ABOUT:
-            Dialog(IDD_ABOUTBOX, AboutBox);
+            Dialog(IDD_ABOUTBOX, AboutBox2);
             break;
 
         case IDM_EXIT:
@@ -332,7 +332,7 @@ LRESULT MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     case NF_MSG:
         if (wParam == ID_MAIN_LIST)
             //LoadLibrary(TEXT("Riched20.dll"));
-            Dialog(IDD_VIEW_ENTRY, ViewEntry, lParam);
+            Dialog(IDD_VIEW_ENTRY, ViewEntry2, lParam);
         break;
 
     default:

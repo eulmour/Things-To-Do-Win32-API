@@ -1,5 +1,6 @@
 #pragma once
 #include "WinapiBase/Dialog.h"
+#include "NoteList.h"
 
 class Main2Window : public BaseDialog<Main2Window>
 {
@@ -14,11 +15,17 @@ protected:
     void InitFileHierarchy();
     void ResizeList();
     void SetTitle(LPCWSTR lpText);
-    HRESULT _WriteComplexToFile();
-    HRESULT _ReadComplexFromFile();
+    HRESULT WriteDataToFile();
+    HRESULT ReadDataFromFile();
 
     std::wstring sCurrentFilePath;
 
     HANDLE hFile = nullptr;
+
+private:
+    DWORD   listViewStyle = WS_CHILD | WS_VISIBLE | LVS_REPORT | LVS_EDITLABELS;
+    LPCWSTR pszColumnNames[2] = { L"Note", L"Modified" };
+    DWORD   pdwColumnsWidth[2] = { 700, 120 };
+    NoteList listView = { 2, pszColumnNames, pdwColumnsWidth, hDlg, IDC_LIST_ENTRIES, listViewStyle };
 };
 

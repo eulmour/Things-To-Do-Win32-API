@@ -9,14 +9,14 @@ protected:
 
     virtual INT_PTR OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) = 0;
 
-    static inline INT_PTR WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+    static inline INT_PTR DialogProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         static DERIVED_TYPE* pThis = NULL;
 
         if (uMsg == WM_INITDIALOG)
         {
             pThis = reinterpret_cast<DERIVED_TYPE*>(lParam);
-            pThis->hWnd = hWnd;
+            pThis->hDlg = hDlg;
         }
 
         if (pThis)
@@ -25,25 +25,25 @@ protected:
         }
         else
         {
-            return DefWindowProc(hWnd, uMsg, wParam, lParam);
+            return DefWindowProc(hDlg, uMsg, wParam, lParam);
         }
     }
 
 public:
-    BaseDialog() : hWnd(), iId() { }
+    BaseDialog() : hDlg(), iId() { }
 
     constexpr void Create()
     {
-        hWnd = CreateDialogParamW(
+        hDlg = CreateDialogParamW(
             GetModuleHandle(NULL),
             MAKEINTRESOURCE(iId),
             NULL,
-            DERIVED_TYPE::WindowProc,
+            (DLGPROC)DERIVED_TYPE::DialogProc,
             (LPARAM)reinterpret_cast<DERIVED_TYPE*>(this));
 
-        ShowWindow(hWnd, 10);
+        ShowWindow(hDlg, 10);
     }
 
-	HWND hWnd;
+	HWND hDlg;
     int iId;
 };
