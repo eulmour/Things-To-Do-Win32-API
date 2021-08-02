@@ -14,7 +14,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
     InitCommonControlsEx(&icex);
 
-    Main2Window mainWindow(IDD_DIALOG_MAIN);
+    MainWindow mainWindow(IDD_DIALOG_MAIN);
     mainWindow.Create();
 
     MSG msg;

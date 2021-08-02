@@ -159,23 +159,19 @@
     <ClInclude Include="src\NoteList.h" />
     <ClInclude Include="src\Modal.h" />
     <ClInclude Include="res\resource.h" />
-    <ClInclude Include="src\Main2Window.h" />
-    <ClInclude Include="src\WinapiBase\Base.h" />
-    <ClInclude Include="src\WinapiBase\BaseWindow.h" />
+    <ClInclude Include="src\MainWindow.h" />
     <ClInclude Include="src\ThingsToDo.h" />
     <ClInclude Include="src\WinapiBase\Dialog.h" />
     <ClInclude Include="src\WinapiBase\framework.h" />
-    <ClInclude Include="src\MainWindow.h" />
     <ClInclude Include="src\WinapiBase\targetver.h" />
-    <ClInclude Include="src\WinapiBase\Utils.h" />
+    <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\NoteList.cpp" />
     <ClCompile Include="src\Modal.cpp" />
-    <ClCompile Include="src\Main2Window.cpp" />
-    <ClCompile Include="src\ThingsToDo.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
-    <ClCompile Include="src\WinapiBase\Utils.cpp" />
+    <ClCompile Include="src\ThingsToDo.cpp" />
+    <ClCompile Include="src\Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\ThingsToDo.rc" />

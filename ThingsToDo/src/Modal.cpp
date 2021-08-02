@@ -104,6 +104,7 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 
             GetWindowTextW(hEditText, temp_buffer, 256);
             pNoteList->GetData().at(iItemIndex).aTextFields.at(0) = temp_buffer;
+            pNoteList->GetData().at(iItemIndex).aTextFields.at(1) = GetTime();
             pNoteList->GetData().at(iItemIndex).dwColor = colors[iColorIndex].color;
 
             ListView_SetItemText(*pNoteList, iItemIndex, 0, temp_buffer);
