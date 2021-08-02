@@ -11,12 +11,17 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         InitWindowControls();
         InitFileHierarchy();
 
-        SendMessage(hDlg, WM_SETICON, (WPARAM)1, (LPARAM)LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_SMALL)));
+        SendMessage(
+            hDlg,
+            WM_SETICON,
+            (WPARAM)1,
+            (LPARAM)LoadIcon(GetModuleHandle(NULL),
+            MAKEINTRESOURCE(IDI_SMALL)));
 
         ShowWindow(hDlg, SW_NORMAL);
         UpdateWindow(hDlg);
 
-        return (INT_PTR)TRUE;
+        break;
     }
 
     case WM_COMMAND:
@@ -27,7 +32,7 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         {
         case ID_FILE_NEW:
             noteList.Clear();
-            return (INT_PTR)TRUE;
+            break;
 
         case ID_FILE_OPEN:
         {
@@ -40,7 +45,7 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             if (ReadDataFromFile() == S_FALSE) MessageBox(hDlg, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
             noteList.UpdateList();
 
-            return (INT_PTR)TRUE;
+            break;
         }
 
         case ID_FILE_SAVE:
@@ -49,7 +54,7 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             if (WriteDataToFile() == S_FALSE) MessageBox(hDlg, L"Error while saving file", L"Error", MB_OK | MB_ICONERROR);
 
-            return (INT_PTR)TRUE;
+            break;
         }
 
         case ID_EDIT_CUT: /* TODO cut item */
@@ -57,52 +62,52 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             DWORD dwSelected = ListView_GetNextItem(noteList, -1, LVNI_SELECTED);
 
             if (dwSelected == -1)
-                return (INT_PTR)TRUE;
+                break;
 
             ListView_DeleteItem(noteList, dwSelected);
-            return (INT_PTR)TRUE;
+            break;
         }
 
         case ID_EDIT_COPY: /* TODO copy item */
 
 
 
-            return (INT_PTR)TRUE;
+            break;
 
         case ID_EDIT_PASTE: /* TODO paste item */
 
 
 
-            return (INT_PTR)TRUE;
+            break;
 
         case ID_EDIT_SELECTALL:
         {
             SendListViewMessage(hDlg, IDC_LIST_ENTRIES, LM_SELECTALL);
-            return (INT_PTR)TRUE;
+            break;
         }
 
         case ID_EDIT_INSERTNEW:
         {
             noteList.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
             noteList.UpdateList();
-            return (INT_PTR)TRUE;
+            break;
         }
 
         case ID_EDIT_DELETE:
             //TODO: delete selection
             noteList.DeleteItem();
-            return (INT_PTR)TRUE;
+            break;
 
         case IDM_ABOUT:
 
             DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hDlg, AboutBox);
-            return (INT_PTR)TRUE;
+            break;
 
         case IDM_EXIT:
 
             PostQuitMessage(0);
             EndDialog(hDlg, NULL);
-            return (INT_PTR)TRUE;
+            break;
         }
 
         break;
@@ -110,31 +115,28 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_NOTIFY:
     {
-        if (((LPNMHDR)lParam)->code == LVN_BEGINLABELEDIT)
-            MessageBeep(MB_OK);
-
         if (noteList.GetId() == LOWORD(wParam))
         {
             LPNMLISTVIEW pnm = (LPNMLISTVIEW)lParam;
 
             if (pnm->hdr.hwndFrom == noteList && pnm->hdr.code == NM_CUSTOMDRAW)
             {
-                SetWindowLongPtr(hDlg, 0, (LONG)ProcessCustomDraw(lParam));
-                return (INT_PTR)TRUE;
+                SetWindowLongPtr(hDlg, 0, (LONG)ProcessCustomDraw(lParam, noteList.GetData()));
+                break;
             }
 
-            return (INT_PTR)noteList.OnNotify(lParam);
+            noteList.OnNotify(lParam);
         }
 
-        return (INT_PTR)FALSE;
+        break;
     }
 
     case WM_PAINT:
     {
-        //PAINTSTRUCT ps;
-        //HDC hdc = BeginPaint(hDlg, &ps);
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hDlg, &ps);
 
-        //EndPaint(hDlg, &ps);
+        EndPaint(hDlg, &ps);
 
         return (INT_PTR)0;
     }
@@ -145,7 +147,7 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
             ResizeList();
 
-        return (INT_PTR)TRUE;
+        break;
 
     case NF_MSG:
     {
@@ -158,13 +160,21 @@ INT_PTR CALLBACK Main2Window::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_CLOSE:
-
+    {
         PostQuitMessage(0);
         EndDialog(hDlg, NULL);
 
-        return (INT_PTR)TRUE;
+        break;
     }
-    return (INT_PTR)FALSE;
+
+    default:
+    {
+        return (INT_PTR)FALSE;
+    }
+
+    }
+
+    return (INT_PTR)TRUE;
 }
 
 void Main2Window::InitWindowControls()

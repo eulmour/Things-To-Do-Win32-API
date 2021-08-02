@@ -16,16 +16,16 @@ NoteList::NoteList(
 BOOL NoteList::Init(HWND hParent)
 {
     hWnd = GetDlgItem(hParent, iId);
+    ListView_SetUnicodeFormat(hWnd, TRUE); /* that line of code worth me 2 days */
+    SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
+    
     InitColumns();
-    //SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)this);
 
     return hWnd == INVALID_HANDLE_VALUE ? false : true;
 }
 
 void NoteList::InitColumns()
 {
-    //SetWindowLongPtr(hWnd, GWLP_USERDATA, cColumns);
-
     for (DWORD dwIndex = 0; dwIndex < cColumns; dwIndex++) {
         LVCOLUMN lvc;
 

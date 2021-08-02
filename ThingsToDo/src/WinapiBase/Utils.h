@@ -29,4 +29,4 @@ void            ReadRowFromFile(std::vector<ListViewRow>& aRows, DWORD dwSize, O
 HANDLE          HandleFile(LPCWSTR lpPath, BOOL bSave);
 const wchar_t*  GetTime();
 std::basic_string<TCHAR> GetLastErrorMessage();
-LRESULT         ProcessCustomDraw(LPARAM lParam);
+LRESULT         ProcessCustomDraw(LPARAM lParam, std::vector<ListViewRow>& data);
