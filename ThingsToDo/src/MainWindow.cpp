@@ -16,7 +16,7 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
             WM_SETICON,
             (WPARAM)1,
             (LPARAM)LoadIcon(GetModuleHandle(NULL),
-            MAKEINTRESOURCE(IDI_SMALL)));
+                MAKEINTRESOURCE(IDI_SMALL)));
 
         ShowWindow(hDlg, SW_NORMAL);
         UpdateWindow(hDlg);
@@ -33,7 +33,6 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         case ID_FILE_NEW:
             noteList.Clear();
             break;
-        }
 
         case ID_FILE_OPEN:
         {
@@ -95,17 +94,14 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         }
 
         case ID_EDIT_DELETE:
-        {
             //TODO: delete selection
             noteList.DeleteItem();
             break;
-        }
 
         case IDM_ABOUT:
 
             DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_ABOUTBOX), hDlg, AboutBox);
             break;
-        }
 
         case IDM_EXIT:
 
@@ -146,7 +142,6 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_SIZE:
-    {
         ResizeList();
 
         if (wParam == SIZE_MAXIMIZED || wParam == SIZE_RESTORED)
