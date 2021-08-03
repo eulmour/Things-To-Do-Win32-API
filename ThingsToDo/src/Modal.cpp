@@ -1,9 +1,8 @@
+#include "NoteList.h"
 #include "Modal.h"
-#include "resource.h"
-#include "WinapiBase/Base.h"
 
-static HWND hEditText = nullptr;
-static HWND hColorBox = nullptr;
+#define SET_CLR_ID(source, id) (source |= id << 24)
+#define GET_CLR_ID(color) (color >> 24)
 
 INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -25,9 +24,13 @@ INT_PTR CALLBACK AboutBox(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam /* listview hwnd*/)
 {
-    static ListView* listView = nullptr;
+    static LONG iItemIndex = -1;
+    static int iColorIndex = 0;
+    static HWND hEditText = nullptr;
+    static HWND hColorBox = nullptr;
+    static NoteList* pNoteList = nullptr;
 
     static struct ColorInfo
     {
@@ -35,24 +38,25 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
         DWORD color;
     } colors[11] =
     {
-        { TEXT("None"),          0xFFFFFF },
-        { TEXT("Red"),           0xFF0000 },
-        { TEXT("Dark red"),      0x770000 },
-        { TEXT("Gray"),          0x888888 },
-        { TEXT("Blue"),          0x1133FF },
-        { TEXT("Dark blue"),     0x000088 },
-        { TEXT("Orange"),        0xFFFFFF },
-        { TEXT("Purple"),        0xFFFFFF },
-        { TEXT("Silver"),        0xFFFFFF },
-        { TEXT("Olive"),         0xFFFFFF },
-        { TEXT("Green"),         0xFFFFFF }
+        { TEXT("None"),          RGB(255, 255, 255) },
+        { TEXT("Red"),           RGB(255, 0, 0) },
+        { TEXT("Dark red"),      RGB(127, 0, 0) },
+        { TEXT("Gray"),          RGB(190, 190, 190) },
+        { TEXT("Blue"),          RGB(180, 180, 255) },
+        { TEXT("Dark blue"),     RGB(30, 30, 127) },
+        { TEXT("Orange"),        RGB(255, 160, 60) },
+        { TEXT("Purple"),        RGB(128, 0, 255) },
+        { TEXT("Silver"),        RGB(220, 220, 220) },
+        { TEXT("Olive"),         RGB(128, 128, 64) },
+        { TEXT("Green"),         RGB(128, 255, 128) }
     };
 
     switch (message)
     {
     case WM_INITDIALOG:
     {
-        listView = reinterpret_cast<ListView*>(lParam);
+        pNoteList = reinterpret_cast<NoteList*>(lParam);
+        iItemIndex = pNoteList->dwSelected;
 
         TCHAR temp_buffer[256] = L"";
         std::wstringstream ss;
@@ -60,13 +64,13 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
         hEditText = GetDlgItem(hDlg, IDC_EDIT_TEXT);
         SetFocus(hEditText);
 
-        if (listView->dwSelected == -1)
+        if (iItemIndex == -1)
         {
             MessageBox(GetParent(hDlg), TEXT("No items in list"), TEXT("Error"), MB_OK | MB_ICONINFORMATION);
             break;
         }
 
-        ListView_GetItemText(*listView, listView->dwSelected, 0 /*col*/, temp_buffer, 256);
+        ListView_GetItemText(*pNoteList, iItemIndex, 0 /*col*/, temp_buffer, 256);
         ss << temp_buffer /* << "\r\n" */;
 
         Edit_SetText(hEditText, ss.str().c_str());
@@ -78,7 +82,9 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
             SendMessage(hColorBox, (UINT)CB_ADDSTRING, (WPARAM)0, (LPARAM)colors[k].name);
         }
 
-        ComboBox_SetCurSel(hColorBox, 0);
+        ComboBox_SetCurSel(
+            hColorBox,
+            GET_CLR_ID(pNoteList->GetData().at(iItemIndex).dwColor));
 
         return (INT_PTR)TRUE;
     }
@@ -94,12 +100,14 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
         if (LOWORD(wParam) == IDOK)
         {
             TCHAR temp_buffer[256] = L"";
+            SET_CLR_ID(colors[iColorIndex].color, iColorIndex); /* add an id */
 
             GetWindowTextW(hEditText, temp_buffer, 256);
-            listView->GetData().at(listView->dwSelected).aTextFields.at(0) = temp_buffer;
-            listView->GetData().at(listView->dwSelected).dwColor = colors[listView->dwSelected].color;
+            pNoteList->GetData().at(iItemIndex).aTextFields.at(0) = temp_buffer;
+            pNoteList->GetData().at(iItemIndex).aTextFields.at(1) = GetTime();
+            pNoteList->GetData().at(iItemIndex).dwColor = colors[iColorIndex].color;
 
-            ListView_SetItemText(*listView, listView->dwSelected, 0, temp_buffer);
+            ListView_SetItemText(*pNoteList, iItemIndex, 0, temp_buffer);
 
             EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
@@ -107,7 +115,7 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
 
         if (HIWORD(wParam) == CBN_SELCHANGE)
         {
-            int ItemIndex = ComboBox_GetCurSel(hColorBox);
+            iColorIndex = ComboBox_GetCurSel(hColorBox);
             return (INT_PTR)TRUE;
         }
 

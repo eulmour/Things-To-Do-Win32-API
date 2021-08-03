@@ -3,6 +3,7 @@
 //TODO Could be potentially deleted
 //#include "resource.h"
 #include "ThingsToDo.h"
+//#include "MainWindow.h"
 #include "MainWindow.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,

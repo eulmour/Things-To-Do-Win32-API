@@ -1,18 +1,16 @@
 #pragma once
-#include "BaseWindow.h"
-#define ID_MAIN_LIST (WM_USER + 0x1001)
+#include "WinapiBase/Dialog.h"
+#include "NoteList.h"
 
-class MainWindow : public BaseWindow<MainWindow> {
+class MainWindow : public BaseDialog<MainWindow>
+{
 public:
 
-    MainWindow(WindowClass*& wc)
-    {
-        Register(wc);
-    }
-
-    LRESULT OnMessage(HWND hHandle, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    MainWindow(int id) { iId = id; }
+    INT_PTR CALLBACK OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
 protected:
+
     void InitWindowControls();
     void InitFileHierarchy();
     void ResizeList();
@@ -22,6 +20,11 @@ protected:
 
     std::wstring sCurrentFilePath;
 
-    DWORD m_dwLastError = 0UL;
-    HANDLE m_hFile = nullptr;
+    HANDLE hFile = nullptr;
+
+private:
+    LPCWSTR pszColumnNames[2] = { L"Note", L"Modified" };
+    DWORD   pdwColumnsWidth[2] = { 700, 120 };
+    NoteList noteList = { 2, pszColumnNames, pdwColumnsWidth, hDlg, IDC_LIST_ENTRIES };
 };
+

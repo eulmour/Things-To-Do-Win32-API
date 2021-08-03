@@ -243,7 +243,9 @@ std::basic_string<TCHAR> GetLastErrorMessage()
     }
 }
 
-LRESULT ProcessCustomDraw(LPARAM lParam, LONG iSelect)
+#define ISBRIGHT(c) ((c & ~(0xFFFFFF << 8)) > 0x8F) || ((c & ~(0xFFFF << 16)) > 0x8FFF)
+
+LRESULT ProcessCustomDraw(LPARAM lParam, std::vector<ListViewRow>& data)
 {
     LPNMLVCUSTOMDRAW lplvcd = (LPNMLVCUSTOMDRAW)lParam;
 
@@ -254,49 +256,15 @@ LRESULT ProcessCustomDraw(LPARAM lParam, LONG iSelect)
         return CDRF_NOTIFYITEMDRAW;
 
     case CDDS_ITEMPREPAINT: //Before an item is drawn
-        if (((int)lplvcd->nmcd.dwItemSpec % 2) == 0)
-        {
-            //customize item appearance
-            lplvcd->clrText = RGB(255, 0, 0);
-            lplvcd->clrTextBk = RGB(200, 200, 200);
-            return CDRF_NEWFONT;
-        }
-        else {
-            lplvcd->clrText = RGB(0, 0, 255);
-            lplvcd->clrTextBk = RGB(255, 255, 255);
+    {
+        DWORD color = (data[(int)lplvcd->nmcd.dwItemSpec].dwColor) & ~(0xFF << 24);
+        
+        lplvcd->clrText = ISBRIGHT(color) ? RGB(0, 0, 0) : RGB(255, 255, 255);
+        lplvcd->clrTextBk = color;
 
-            return CDRF_NEWFONT;
-        }
+        return CDRF_NEWFONT;
+    }
         break;
-
-        //Before a subitem is drawn
-    case CDDS_SUBITEM | CDDS_ITEMPREPAINT:
-        if (iSelect == (int)lplvcd->nmcd.dwItemSpec)
-        {
-            if (0 == lplvcd->iSubItem)
-            {
-                //customize subitem appearance for column 0
-                lplvcd->clrText = RGB(255, 0, 0);
-                lplvcd->clrTextBk = RGB(255, 255, 255);
-
-                //To set a custom font:
-                //SelectObject(lplvcd->nmcd.hdc, 
-                //    <your custom HFONT>);
-
-                return CDRF_NEWFONT;
-            }
-            else if (1 == lplvcd->iSubItem)
-            {
-                //customize subitem appearance for columns 1..n
-                //Note: setting for column i 
-                //carries over to columnn i+1 unless
-                //      it is explicitly reset
-                lplvcd->clrTextBk = RGB(255, 0, 0);
-                lplvcd->clrTextBk = RGB(255, 255, 255);
-
-                return CDRF_NEWFONT;
-            }
-        }
     }
     return CDRF_DODEFAULT;
 }

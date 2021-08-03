@@ -361,5 +361,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/ThingsToDo/src/Main2Window.cpp
-/ThingsToDo/src/Main2Window.h
