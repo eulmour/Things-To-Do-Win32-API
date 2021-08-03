@@ -218,15 +218,17 @@ const wchar_t* GetTime()
 std::basic_string<TCHAR> GetLastErrorMessage()
 {
     LPTSTR psz = NULL;
-    const DWORD cchMsg = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
-        | FORMAT_MESSAGE_IGNORE_INSERTS
-        | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-        NULL, // (not used with FORMAT_MESSAGE_FROM_SYSTEM)
+    const DWORD cchMsg = FormatMessage(
+        FORMAT_MESSAGE_FROM_SYSTEM |
+        FORMAT_MESSAGE_IGNORE_INSERTS |
+        FORMAT_MESSAGE_ALLOCATE_BUFFER,
+        NULL,
         GetLastError(),
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         reinterpret_cast<LPTSTR>(&psz),
         0,
         NULL);
+
     if (cchMsg > 0)
     {
         // Assign buffer to smart pointer with custom deleter so that memory gets released
