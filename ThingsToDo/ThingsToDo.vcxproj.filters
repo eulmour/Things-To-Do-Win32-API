@@ -39,7 +39,7 @@
     <ClInclude Include="src\Modal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\NoteList.h">
+    <ClInclude Include="src\TaskList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Modal.h">
@@ -59,7 +59,7 @@
     <ClCompile Include="src\Modal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\NoteList.cpp">
+    <ClCompile Include="src\TaskList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Modal.cpp">
@@ -76,6 +76,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\ThingsToDo.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\ThingsToDo1.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

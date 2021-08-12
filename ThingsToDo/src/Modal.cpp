@@ -1,4 +1,4 @@
-#include "NoteList.h"
+#include "TaskList.h"
 #include "Modal.h"
 
 #define SET_CLR_ID(source, id) (source |= id << 24)
@@ -30,7 +30,7 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     static int iColorIndex = 0;
     static HWND hEditText = nullptr;
     static HWND hColorBox = nullptr;
-    static NoteList* pNoteList = nullptr;
+    static TaskList* pNoteList = nullptr;
 
     static struct ColorInfo
     {
@@ -55,7 +55,7 @@ INT_PTR CALLBACK ViewEntry(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam
     {
     case WM_INITDIALOG:
     {
-        pNoteList = reinterpret_cast<NoteList*>(lParam);
+        pNoteList = reinterpret_cast<TaskList*>(lParam);
         iItemIndex = pNoteList->dwSelected;
 
         TCHAR temp_buffer[256] = L"";

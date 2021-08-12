@@ -1,6 +1,6 @@
-#include "NoteList.h"
+#include "TaskList.h"
 
-NoteList::NoteList(
+TaskList::TaskList(
     DWORD cCount,
     LPCWSTR* pszColumnDesc,
     DWORD* pdwColumnWidth,
@@ -13,7 +13,7 @@ NoteList::NoteList(
     pszColumnDesc(pszColumnDesc),
     pdwColumnWidth(pdwColumnWidth) { }
 
-BOOL NoteList::Init(HWND hParent)
+BOOL TaskList::Init(HWND hParent)
 {
     hWnd = GetDlgItem(hParent, iId);
     ListView_SetUnicodeFormat(hWnd, TRUE); /* that line of code worth me 2 days */
@@ -24,7 +24,7 @@ BOOL NoteList::Init(HWND hParent)
     return hWnd == INVALID_HANDLE_VALUE ? false : true;
 }
 
-void NoteList::InitColumns()
+void TaskList::InitColumns()
 {
     for (DWORD dwIndex = 0; dwIndex < cColumns; dwIndex++) {
         LVCOLUMN lvc;
@@ -41,12 +41,12 @@ void NoteList::InitColumns()
     }
 }
 
-void NoteList::SetStyle(DWORD dwView)
+void TaskList::SetStyle(DWORD dwView)
 {
     ListView_SetExtendedListViewStyle(hWnd, dwView);
 }
 
-BOOL NoteList::OnNotify(LPARAM lParam)
+BOOL TaskList::OnNotify(LPARAM lParam)
 {
     NMLVDISPINFO* plvdi = (NMLVDISPINFO*)lParam;
 
@@ -124,7 +124,7 @@ BOOL NoteList::OnNotify(LPARAM lParam)
     return 0;
 }
 
-BOOL NoteList::UpdateList()
+BOOL TaskList::UpdateList()
 {
     LVITEM lvI;
     ZeroStruct(lvI);
@@ -158,7 +158,7 @@ BOOL NoteList::UpdateList()
     return TRUE;
 }
 
-void NoteList::DeleteItem()
+void TaskList::DeleteItem()
 {
     while (true)
     {
@@ -172,14 +172,14 @@ void NoteList::DeleteItem()
     }
 }
 
-void NoteList::Clear()
+void TaskList::Clear()
 {
     ListView_DeleteAllItems(hWnd);
     aRows.clear();
     cRows = 0;
 }
 
-NoteList::operator HWND()
+TaskList::operator HWND()
 {
     return hWnd ? hWnd : throw std::runtime_error("Error: control wasn't assigned to the window");
 }

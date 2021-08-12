@@ -156,7 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\NoteList.h" />
+    <ClInclude Include="src\TaskList.h" />
     <ClInclude Include="src\Modal.h" />
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\MainWindow.h" />
@@ -167,7 +167,7 @@
     <ClInclude Include="src\Utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\NoteList.cpp" />
+    <ClCompile Include="src\TaskList.cpp" />
     <ClCompile Include="src\Modal.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
     <ClCompile Include="src\ThingsToDo.cpp" />
@@ -179,6 +179,7 @@
   <ItemGroup>
     <Image Include="res\ThingsToDo.ico" />
     <Image Include="res\small.ico" />
+    <Image Include="res\ThingsToDo1.png" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="res\ThingsToDo.exe.manifest" />

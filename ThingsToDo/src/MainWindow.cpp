@@ -31,7 +31,7 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
         switch (wmId)
         {
         case ID_FILE_NEW:
-            noteList.Clear();
+            taskList.Clear();
             break;
 
         case ID_FILE_OPEN:
@@ -41,9 +41,9 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
             hFile = HandleFile(sCurrentFilePath.c_str(), FALSE);
 
-            noteList.Clear();
+            taskList.Clear();
             if (ReadDataFromFile() == S_FALSE) MessageBox(hDlg, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
-            noteList.UpdateList();
+            taskList.UpdateList();
 
             break;
         }
@@ -59,12 +59,12 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case ID_EDIT_CUT: /* TODO cut item */
         {
-            DWORD dwSelected = ListView_GetNextItem(noteList, -1, LVNI_SELECTED);
+            DWORD dwSelected = ListView_GetNextItem(taskList, -1, LVNI_SELECTED);
 
             if (dwSelected == -1)
                 break;
 
-            ListView_DeleteItem(noteList, dwSelected);
+            ListView_DeleteItem(taskList, dwSelected);
             break;
         }
 
@@ -88,14 +88,14 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case ID_EDIT_INSERTNEW:
         {
-            noteList.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
-            noteList.UpdateList();
+            taskList.AddRow<0xFFFFFF, FALSE>(L"", GetTime());
+            taskList.UpdateList();
             break;
         }
 
         case ID_EDIT_DELETE:
             //TODO: delete selection
-            noteList.DeleteItem();
+            taskList.DeleteItem();
             break;
 
         case IDM_ABOUT:
@@ -115,17 +115,17 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
     case WM_NOTIFY:
     {
-        if (noteList.GetId() == LOWORD(wParam))
+        if (taskList.GetId() == LOWORD(wParam))
         {
             LPNMLISTVIEW pnm = (LPNMLISTVIEW)lParam;
 
-            if (pnm->hdr.hwndFrom == noteList && pnm->hdr.code == NM_CUSTOMDRAW)
+            if (pnm->hdr.hwndFrom == taskList && pnm->hdr.code == NM_CUSTOMDRAW)
             {
-                SetWindowLongPtr(hDlg, 0, (LONG)ProcessCustomDraw(lParam, noteList.GetData()));
+                SetWindowLongPtr(hDlg, 0, (LONG)ProcessCustomDraw(lParam, taskList.GetData()));
                 break;
             }
 
-            noteList.OnNotify(lParam);
+            taskList.OnNotify(lParam);
         }
 
         break;
@@ -153,7 +153,7 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
         if (wParam == IDC_LIST_ENTRIES)
         {
-            DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_VIEW_ENTRY), hDlg, ViewEntry, (LPARAM)&noteList);
+            DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_VIEW_ENTRY), hDlg, ViewEntry, (LPARAM)&taskList);
         }
 
         break;
@@ -179,9 +179,9 @@ INT_PTR CALLBACK MainWindow::OnMessage(UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 void MainWindow::InitWindowControls()
 {
-    noteList.Init(hDlg);
-    noteList.SetStyle(LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
-    SetFocus(noteList);
+    taskList.Init(hDlg);
+    taskList.SetStyle(LVS_EX_CHECKBOXES | LVS_EX_FULLROWSELECT | LVS_EX_HEADERDRAGDROP);
+    SetFocus(taskList);
 }
 
 void MainWindow::InitFileHierarchy()
@@ -212,7 +212,7 @@ void MainWindow::InitFileHierarchy()
 
         if (ReadDataFromFile() == S_FALSE) MessageBox(hDlg, L"Error. File not found", L"Error", MB_OK | MB_ICONERROR);
 
-        noteList.UpdateList();
+        taskList.UpdateList();
     }
 }
 
@@ -221,18 +221,18 @@ void MainWindow::ResizeList()
     RECT rect;
     DWORD nOffset = 0;
 
-    for (size_t i = 0; i < noteList.GetHeader().size(); ++i)
+    for (size_t i = 0; i < taskList.GetHeader().size(); ++i)
     {
         if (i == 0)
             continue;
         nOffset += pdwColumnsWidth[i];
     }
 
-    GetClientRect(noteList, &rect);
-    ListView_SetColumnWidth(noteList, 0, static_cast<DWORD>(rect.right) - nOffset);
+    GetClientRect(taskList, &rect);
+    ListView_SetColumnWidth(taskList, 0, static_cast<DWORD>(rect.right) - nOffset);
 
     GetClientRect(hDlg, &rect);
-    MoveWindow(noteList, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
+    MoveWindow(taskList, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 }
 
 void MainWindow::SetTitle(LPCWSTR lpText)
@@ -247,9 +247,9 @@ HRESULT MainWindow::WriteDataToFile()
     DWORD nBytesWritten = 0UL;
 
     // Columns
-    DWORD headerSize = static_cast<DWORD>(noteList.GetHeader().size());
-    auto headerBegin = noteList.GetHeader().begin();
-    auto headerEnd = noteList.GetHeader().end();
+    DWORD headerSize = static_cast<DWORD>(taskList.GetHeader().size());
+    auto headerBegin = taskList.GetHeader().begin();
+    auto headerEnd = taskList.GetHeader().end();
 
     // 1. Write column count
     WriteFile(
@@ -268,9 +268,9 @@ HRESULT MainWindow::WriteDataToFile()
     }
 
     // Rows
-    DWORD count = static_cast<DWORD>(noteList.GetData().size());
-    auto begin = noteList.GetData().begin();
-    auto end = noteList.GetData().end();
+    DWORD count = static_cast<DWORD>(taskList.GetData().size());
+    auto begin = taskList.GetData().begin();
+    auto end = taskList.GetData().end();
 
     // 1. Write row count
     WriteFile(
@@ -297,8 +297,8 @@ HRESULT MainWindow::ReadDataFromFile()
     OVERLAPPED ol = { 0 };
     ol.Offset = 0;
 
-    noteList.GetHeader().clear();
-    noteList.GetData().clear();
+    taskList.GetHeader().clear();
+    taskList.GetData().clear();
 
     DWORD dwColumnCount = 0;
     DWORD dwRowCount = 0;
@@ -332,7 +332,7 @@ HRESULT MainWindow::ReadDataFromFile()
     // 4. Read column names
     for (size_t i = 0; i < dwColumnCount; i++)
     {
-        ReadTextFromFile(noteList.GetHeader(), ol, hFile);
+        ReadTextFromFile(taskList.GetHeader(), ol, hFile);
     }
 
     // 5. Get the row count
@@ -354,7 +354,7 @@ HRESULT MainWindow::ReadDataFromFile()
     // 8. Read row data
     for (size_t i = 0; i < dwRowCount; i++)
     {
-        ReadRowFromFile(noteList.GetData(), dwColumnCount, ol, hFile);
+        ReadRowFromFile(taskList.GetData(), dwColumnCount, ol, hFile);
     }
 
     CloseHandle(hFile);

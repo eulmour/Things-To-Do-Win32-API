@@ -4,11 +4,11 @@
 
 #define LM_SELECTALL (WM_USER + 0x0300)
 
-class NoteList
+class TaskList
 {
 public:
 
-    NoteList(
+    TaskList(
         DWORD       cCount,
         LPCWSTR*    pszColumnDesc,
         DWORD*      pdwColumnWidth,

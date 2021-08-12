@@ -1,6 +1,6 @@
 #pragma once
 #include "WinapiBase/Dialog.h"
-#include "NoteList.h"
+#include "TaskList.h"
 
 class MainWindow : public BaseDialog<MainWindow>
 {
@@ -23,8 +23,8 @@ protected:
     HANDLE hFile = nullptr;
 
 private:
-    LPCWSTR pszColumnNames[2] = { L"Note", L"Modified" };
+    LPCWSTR pszColumnNames[2] = { L"Task", L"Modified" };
     DWORD   pdwColumnsWidth[2] = { 700, 120 };
-    NoteList noteList = { 2, pszColumnNames, pdwColumnsWidth, hDlg, IDC_LIST_ENTRIES };
+    TaskList taskList = { 2, pszColumnNames, pdwColumnsWidth, hDlg, IDC_LIST_ENTRIES };
 };
 
