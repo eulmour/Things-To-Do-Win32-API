@@ -30,28 +30,28 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -73,19 +73,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\winapi;$(SolutionDir)\ThingsToDo\res;;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\winapi;$(SolutionDir)\ThingsToDo\res;;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;$(IncludePath);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\winapi;$(SolutionDir)\ThingsToDo\res;$(IncludePath);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ThingsToDo\src\WinapiBase;$(SolutionDir)\ThingsToDo\res;$(IncludePath);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\ThingsToDo\src\winapi;$(SolutionDir)\ThingsToDo\res;$(IncludePath);$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,6 +95,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -112,6 +114,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,6 +133,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +152,8 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <CompileAsWinRT>false</CompileAsWinRT>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -156,22 +164,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\TaskList.h" />
-    <ClInclude Include="src\Modal.h" />
+    <ClInclude Include="src\list_view.h" />
+    <ClInclude Include="src\dialogs.h" />
+    <ClInclude Include="src\main_window.h" />
+    <ClInclude Include="src\main_window_msg.h" />
     <ClInclude Include="res\resource.h" />
-    <ClInclude Include="src\MainWindow.h" />
-    <ClInclude Include="src\ThingsToDo.h" />
-    <ClInclude Include="src\WinapiBase\Dialog.h" />
-    <ClInclude Include="src\WinapiBase\framework.h" />
-    <ClInclude Include="src\WinapiBase\targetver.h" />
-    <ClInclude Include="src\Utils.h" />
+    <ClInclude Include="src\things_to_do.h" />
+    <ClInclude Include="src\winapi\file.h" />
+    <ClInclude Include="src\winapi\framework.h" />
+    <ClInclude Include="src\winapi\targetver.h" />
+    <ClInclude Include="src\winapi\util.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\TaskList.cpp" />
-    <ClCompile Include="src\Modal.cpp" />
-    <ClCompile Include="src\MainWindow.cpp" />
-    <ClCompile Include="src\ThingsToDo.cpp" />
-    <ClCompile Include="src\Utils.cpp" />
+    <ClCompile Include="src\list_view.c" />
+    <ClCompile Include="src\dialogs.c" />
+    <ClCompile Include="src\list_view_msg.c" />
+    <ClCompile Include="src\main_window.c" />
+    <ClCompile Include="src\main_window_msg.c" />
+    <ClCompile Include="src\things_to_do.c" />
+    <ClCompile Include="src\winapi\file.c" />
+    <ClCompile Include="src\winapi\util.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\ThingsToDo.rc" />

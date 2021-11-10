@@ -15,54 +15,60 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\WinapiBase\framework.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\WinapiBase\targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\ThingsToDo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="res\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\MainWindow.h">
+    <ClInclude Include="src\things_to_do.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\WinapiBase\Dialog.h">
+    <ClInclude Include="src\main_window_msg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Modal.h">
+    <ClInclude Include="src\dialogs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\TaskList.h">
+    <ClInclude Include="src\main_window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Modal.h">
+    <ClInclude Include="src\winapi\file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\winapi\framework.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\winapi\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\winapi\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\list_view.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ThingsToDo.cpp">
+    <ClCompile Include="src\things_to_do.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Utils.cpp">
+    <ClCompile Include="src\dialogs.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MainWindow.cpp">
+    <ClCompile Include="src\main_window.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Modal.cpp">
+    <ClCompile Include="src\main_window_msg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\TaskList.cpp">
+    <ClCompile Include="src\winapi\file.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Modal.cpp">
+    <ClCompile Include="src\winapi\util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\list_view.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\list_view_msg.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
