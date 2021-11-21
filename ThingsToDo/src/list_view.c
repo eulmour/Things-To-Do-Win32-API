@@ -10,8 +10,9 @@ BOOL ListViewInit(ListView* lw, const int id, const HWND hParent)
     lw->cCapacity = ROW_MAX_DEFAULT;
     lw->cRows = 0;
     lw->cPending = 0;
+    lw->dwSelected = -1;
     lw->hWnd = GetDlgItem(hParent, id);
-    lw->lwRows = (ListViewRow**)malloc(sizeof(ListViewRow) * ROW_MAX_DEFAULT);
+    lw->lwRows = (ListViewRow*)malloc(sizeof(ListViewRow) * ROW_MAX_DEFAULT);
 
 #ifdef UNICODE
     ListView_SetUnicodeFormat(lw->hWnd, TRUE);
@@ -57,26 +58,21 @@ void ListViewSetColumns(ListView* lw, const DWORD cColumns, ListViewCol pColumns
 
 ListViewRow* ListViewCreateRow(ListView* lw, DWORD dwColor, BOOL bChecked, LPCTSTR* rgText)
 {
-    // TODO: all allocated rows must be released
-
     ListViewRow* newRow = (ListViewRow*)malloc(sizeof(ListViewRow));
-    assert(newRow && "Failed to allocate memory for new row");
+    Try(!newRow, TEXT("Failed to allocate memory for new row"));
     newRow->bChecked = bChecked;
     newRow->dwColor = dwColor;
-    newRow->rgTextFields = (LPCTSTR*)malloc(sizeof(LPCTSTR) * lw->cCols);
-    //newRow->rgText = (ListViewText*)malloc(sizeof(ListViewText*) * lw->cCols);
-    //assert(newRow->rgText && "Failed to allocate memory for row data");
+    newRow->rgText = (ListViewText*)malloc(sizeof(ListViewText) * lw->cCols);
+    Try(!newRow->rgText, TEXT("Failed to allocate memory for row data"));
 
     for (BYTE i = 0; i < lw->cCols; i++)
     {
-        size_t newSize = (_tcslen(rgText[i]) + 1) * sizeof(TCHAR);
-        //newRow->rgText[i].dwSize = (_tcslen(rgText[i]) + 1) * sizeof(TCHAR);
+        newRow->rgText[i].dwSize = _tcslen(rgText[i]);
+        size_t newSize = (newRow->rgText[i].dwSize + 1) * sizeof(TCHAR);
         
-        newRow->rgTextFields[i] = (LPCTSTR)malloc(newSize);
-        //newRow->rgText[i].lpszText = (LPCTSTR)malloc(newRow->rgText[i].dwSize);
+        newRow->rgText[i].lpszText = (LPCTSTR)malloc(newSize);
 
-        memcpy_s(newRow->rgTextFields[i], newSize, rgText[i], newSize);
-        //memcpy_s(newRow->rgText[i].lpszText, newRow->rgText[i].dwSize, rgText[i], newRow->rgText[i].dwSize);
+        memcpy_s(newRow->rgText[i].lpszText, newSize, rgText[i], newSize);
     }
 
     return newRow;
@@ -92,37 +88,49 @@ void ListViewDeleteRow(ListView* lw, int iIndex)
 
 void ListViewPushRow(ListView* lw, ListViewRow* lwRow)
 {
-    lw->lwRows[lw->cPending++] = lwRow;
+    lw->lwRows[lw->cPending++] = *lwRow;
 }
 
 void ListViewInsertRow(ListView* lw, ListViewRow* lwRow, int iIndex)
 {
-    lw->lwRows[iIndex] = lwRow;
+    Try(iIndex < 0, TEXT("Invalid item index."));
+    lw->lwRows[iIndex] = *lwRow;
+}
+
+void ListViewReplaceRow(ListView* lw, int iIndex, LPCTSTR* rgText)
+{
+    ListViewRow* changedRow = ListViewCreateRow(
+        lw,
+        lw->lwRows[iIndex].dwColor,
+        lw->lwRows[iIndex].bChecked,
+        rgText
+    );
+
+    ListViewFreeRow(lw, iIndex);
+    ListViewInsertRow(lw, changedRow, iIndex);
 }
 
 void ListViewFreeRow(ListView* lw, int iIndex)
 {
+    Try(iIndex < 0, TEXT("Invalid item index."));
+
     for (BYTE i = 0; i < lw->cCols; i++)
     {
-        free(lw->lwRows[iIndex]->rgTextFields[i]);
-        //free(lw->lwRows[iIndex]->rgText[i].lpszText);
-        //free(lw->lwRows[iIndex]->rgText);
+        free(lw->lwRows[iIndex].rgText[i].lpszText);
     }
 
-    free(lw->lwRows[iIndex]);
+    free(lw->lwRows[iIndex].rgText);
 }
 
 void ListViewDefragment(ListView* lw, int iStart)
 {
     if (iStart >= lw->cPending) return;
-    size_t size = (lw->cPending - iStart) * sizeof(ListViewRow*);
+    size_t size = (lw->cPending - iStart) * sizeof(ListViewRow);
     memmove_s(
         &lw->lwRows[iStart],
         size,
         &lw->lwRows[iStart + 1],
         size);
-
-    lw->lwRows[lw->cPending] = NULL;
 }
 
 void ListViewUpdate(ListView* lw)
@@ -147,7 +155,7 @@ void ListViewUpdate(ListView* lw)
             return FALSE;
 
         // Set checkbox checked
-        ListView_SetCheckState(lw->hWnd, index, lw->lwRows[index]->bChecked);
+        ListView_SetCheckState(lw->hWnd, index, lw->lwRows[index].bChecked);
     }
 
     lw->cRows = lw->cPending;
@@ -167,7 +175,7 @@ LRESULT ListViewProcessCustomDraw(ListView* lw, LPARAM lParam)
 
     case CDDS_ITEMPREPAINT: //Before an item is drawn
     {
-        DWORD color = (lw->lwRows[lplvcd->nmcd.dwItemSpec]->dwColor) & ~(0xFF << 24);
+        DWORD color = (lw->lwRows[lplvcd->nmcd.dwItemSpec].dwColor) & ~(0xFF << 24);
 
         lplvcd->clrText = ISBRIGHT(color) ? RGB(0, 0, 0) : RGB(255, 255, 255);
         lplvcd->clrTextBk = color;

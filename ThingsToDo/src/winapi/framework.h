@@ -14,7 +14,6 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
-#include <assert.h>
 
 #include <windowsx.h>
 #include <commctrl.h>
@@ -31,3 +30,8 @@
 #define ArrayEnd(arr) (&arr[0] + (sizeof(arr) / sizeof(arr[0])))
 #define Distance(begin, end) ((end - begin) * sizeof(*begin))
 #define RandFloat(max) (((float)rand() / (float)(RAND_MAX)) * max)
+#define Try(condition, error_msg) if (condition)\
+{\
+    MessageBox(NULL, error_msg, TEXT("Program failure"), MB_OK | MB_ICONERROR);\
+    abort();\
+}

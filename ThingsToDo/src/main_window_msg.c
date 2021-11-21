@@ -5,12 +5,11 @@
 
 #include "util.h"
 #include "dialogs.h"
-#include "Resource.h"
 #include "file.h"
 #include "list_view.h"
 
 extern ListView lw;
-static LPCTSTR sCurrentFilePath;
+static LPCTSTR szCurrentFilePath[MAX_PATH];
 static HANDLE hFile;
 
 INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -21,7 +20,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
         InitCommonControls();
         InitWindowControls(hWnd);
-        InitFromFile();
+        InitFromFile(hWnd, szCurrentFilePath);
 
         SendMessage(
             hWnd,
@@ -43,23 +42,25 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case ID_FILE_NEW:
             ListView_DeleteAllItems(lw.hWnd);
             ListViewDestroy(&lw);
-            assert(
 
-                ListViewInit(&lw, IDC_LIST_ENTRIES, hWnd) &&
-                "Error during ListViewInit: Unable to initialize window."
+            Try(
+                ListViewInit(&lw, IDC_LIST_ENTRIES, hWnd) == FALSE,
+                TEXT("Error during ListViewInit: Unable to initialize window.")
             );
 
             break;
 
         case ID_FILE_OPEN:
         {
-            sCurrentFilePath = ShowFileDialog(TEXT("Text files\0*.txt\0All files\0*.*\0"), hWnd, FALSE);
-            SetTitle(sCurrentFilePath);
+            if (lParam == NULL)
+                ShowFileDialog(TEXT("Text files\0*.txt\0All files\0*.*\0"), szCurrentFilePath, hWnd, FALSE);
 
-            hFile = HandleFile(sCurrentFilePath, FALSE);
+            SetTitle(hWnd, szCurrentFilePath, FALSE);
+
+            hFile = HandleFile(szCurrentFilePath, FALSE);
             SendMessage(hWnd, WM_COMMAND, ID_FILE_NEW, NULL);
 
-            if (ReadDataFromFile(&lw) == S_FALSE) MessageBox(hWnd, TEXT("Error. File not found"), TEXT("Error"), MB_OK | MB_ICONERROR);
+            if (ReadDataFromFile(&lw, hFile) == S_FALSE) MessageBox(hWnd, TEXT("Error. File not found"), TEXT("Error"), MB_OK | MB_ICONERROR);
             ListViewUpdate(&lw);
 
             break;
@@ -67,12 +68,17 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case ID_FILE_SAVE:
         {
-            hFile = HandleFile(sCurrentFilePath, TRUE);
+            hFile = HandleFile(szCurrentFilePath, TRUE);
 
-            if (WriteDataToFile(&lw) == S_FALSE) MessageBox(hWnd, TEXT("Error while saving file"), TEXT("Error"), MB_OK | MB_ICONERROR);
+            if (WriteDataToFile(&lw, hFile) == S_FALSE) MessageBox(hWnd, TEXT("Error while saving file"), TEXT("Error"), MB_OK | MB_ICONERROR);
 
             break;
         }
+
+        case ID_FILE_SAVEAS:
+            ShowFileDialog(TEXT("Text files\0*.txt\0All files\0*.*\0"), szCurrentFilePath, hWnd, TRUE);
+            SendMessage(hWnd, WM_COMMAND, ID_FILE_SAVE, NULL);
+            break;
 
         case ID_EDIT_CUT:
             SendListViewMessage(hWnd, IDC_LIST_ENTRIES, LM_DELETE);
@@ -102,6 +108,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case IDM_ABOUT:
             DialogBox(app.hInstance, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+            DialogBoxParam(app.hInstance, MAKEINTRESOURCE(IDD_VIEW_ENTRY), hWnd, ViewEntry, (LPARAM)&lw);
             break;
         case IDM_EXIT:
             DestroyWindow(hWnd);
@@ -114,6 +121,7 @@ INT_PTR CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_NOTIFY:
     {
+
         if (lw.iID == LOWORD(wParam))
         {
             LPNMLISTVIEW pnm = (LPNMLISTVIEW)lParam;

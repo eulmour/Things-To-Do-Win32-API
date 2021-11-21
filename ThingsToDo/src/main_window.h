@@ -4,6 +4,6 @@
 
 HWND InitMainWindow();
 void InitWindowControls(HWND hWnd);
-void InitFromFile();
+void InitFromFile(HWND hWnd, LPCTSTR lpszBuffer);
 void Resize(HWND hWnd);
-void SetTitle(LPCWSTR lpszText);
+void SetTitle(HWND hWnd, LPCWSTR lpszText, BOOL bModifiedMark);

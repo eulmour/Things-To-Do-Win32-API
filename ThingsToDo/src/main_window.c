@@ -1,6 +1,6 @@
 #include "main_window.h"
 #include "main_window_msg.h"
-#include "Resource.h"
+#include "resource.h"
 #include "list_view.h"
 
 ListView lw;
@@ -15,11 +15,11 @@ HWND InitMainWindow()
         NULL);
 }
 
-void InitWindowControls(HWND hWnd)
+void WINAPI InitWindowControls(HWND hWnd)
 {
-    assert(
-        ListViewInit(&lw, IDC_LIST_ENTRIES, hWnd) &&
-        "Error during ListViewInit: Unable to initialize window."
+    Try(
+        ListViewInit(&lw, IDC_LIST_ENTRIES, hWnd) == FALSE,
+        TEXT("Error during ListViewInit: Unable to initialize window.")
     );
 
     ListViewSetStyle(&lw,
@@ -38,9 +38,30 @@ void InitWindowControls(HWND hWnd)
     ListViewSetColumns(&lw, 2, rgColumns);
 }
 
-void InitFromFile()
+void InitFromFile(HWND hWnd, LPCTSTR lpszBuffer)
 {
-    // TODO: Add default file loader
+    if (SUCCEEDED(SHGetFolderPath(NULL, CSIDL_APPDATA | CSIDL_FLAG_CREATE, NULL, 0, lpszBuffer)))
+    {
+        PathAppend(lpszBuffer, TEXT("\\ThingsToDo"));
+
+        // if no app folder found create that one
+        if (!DirectoryExists(lpszBuffer))
+        {
+            CreateDirectory(lpszBuffer, NULL);
+        }
+
+        PathAppend(lpszBuffer, TEXT("\\data.txt"));
+
+        // if file isn't found create it
+        if (!FileExists(lpszBuffer))
+        {
+            SendMessage(hWnd, WM_COMMAND, ID_FILE_SAVE, NULL);
+        }
+        else
+        {
+            SendMessage(hWnd, WM_COMMAND, ID_FILE_OPEN, lpszBuffer);
+        }
+    }
 }
 
 void Resize(HWND hWnd)

@@ -21,8 +21,7 @@ typedef struct ListViewRow
 {
 	BOOL			bChecked;
 	DWORD			dwColor;
-	LPCTSTR*		rgTextFields;
-	//ListViewText*	rgText;
+	ListViewText*	rgText;
 
 } ListViewRow;
 
@@ -31,8 +30,9 @@ typedef struct ListView
 	int				iID;
 	HWND			hWnd;
 	DWORD			dwStyle;
+	DWORD			dwSelected;
 	ListViewCol*	lwCols;
-	ListViewRow**	lwRows;
+	ListViewRow*	lwRows;
 	DWORD			cCols;
 	DWORD			cRows;
 	DWORD			cPending;
@@ -49,6 +49,7 @@ ListViewRow*	ListViewCreateRow			(ListView* lw, DWORD dwColor, BOOL bChecked, LP
 void			ListViewDeleteRow			(ListView* lw, int iIndex);
 void			ListViewPushRow				(ListView* lw, ListViewRow* lwRow);
 void			ListViewInsertRow			(ListView* lw, ListViewRow* lwRow, int iIndex);
+void			ListViewReplaceRow			(ListView* lw, int iIndex, LPCTSTR* rgText);
 void			ListViewFreeRow				(ListView* lw, int iIndex);
 void			ListViewDefragment			(ListView* lw, int iStart);
 void			ListViewUpdate				(ListView* lw);

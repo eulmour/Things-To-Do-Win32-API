@@ -1,13 +1,8 @@
 #include "list_view.h"
+#include "dialogs.h"
 
 #define TEXT_BUFFER_SIZE 256
 
-static enum Edit
-{
-    NORMAL, PREVENT
-} EditMode = NORMAL;
-
-static DWORD dwSelected = -1;
 static HWND hEditLabel = INVALID_HANDLE_VALUE;
 
 BOOL ListViewOnNotify(ListView* lw, LPARAM lParam)
@@ -20,59 +15,48 @@ BOOL ListViewOnNotify(ListView* lw, LPARAM lParam)
     case LVN_GETDISPINFO:
 
         // sets text to a ListView field
-        plvdi->item.pszText = (LPTSTR)lw->lwRows[plvdi->item.iItem]->rgTextFields[plvdi->item.iSubItem];
-        //plvdi->item.pszText = (LPTSTR)lw->lwRows[plvdi->item.iItem]->rgText[plvdi->item.iSubItem].lpszText;
+        plvdi->item.pszText = (LPTSTR)lw->lwRows[plvdi->item.iItem].rgText[plvdi->item.iSubItem].lpszText;
         break;
 
     case LVN_BEGINLABELEDIT:
 
-        hEditLabel = ListView_GetEditControl(lw->hWnd);
+        hEditLabel = ListView_GetEditControl(lw->hWnd); // probably unused
         break;
 
     case LVN_ENDLABELEDIT:
     {
-        if (EditMode == NORMAL)
+        if (plvdi->item.pszText)
         {
             TCHAR timeBuffer[32];
             GetTime(timeBuffer);
 
             plvdi->item.iSubItem = 0;     // we get the item only (change for sub)
 
-            ListViewRow* changedRow = ListViewCreateRow(
-                lw,
-                lw->lwRows[dwSelected]->dwColor,
-                lw->lwRows[dwSelected]->bChecked,
-                (LPCTSTR[2]) {
-                    plvdi->item.pszText,
-                    timeBuffer
-                }
-            );
+            ListViewReplaceRow(lw, lw->dwSelected, (LPCTSTR[2]) {
+                plvdi->item.pszText,
+                timeBuffer
+            });
 
-            ListViewFreeRow(lw, dwSelected);
-            ListViewInsertRow(lw, changedRow, dwSelected);
-
-            plvdi->item.pszText = changedRow->rgTextFields[0];
-            //plvdi->item.pszText = changedRow->rgText[0].lpszText;
+            plvdi->item.pszText = lw->lwRows[lw->dwSelected].rgText[0].lpszText;
         }
 
-        EditMode = NORMAL;
         break;
     }
 
     case LVN_ITEMCHANGED:
     {
         LPNMLISTVIEW pNMLV = (LPNMLISTVIEW)lParam;
-        dwSelected = ListView_GetNextItem(lw->hWnd, -1, LVNI_FOCUSED);
+        lw->dwSelected = ListView_GetNextItem(lw->hWnd, -1, LVNI_FOCUSED);
 
         if (pNMLV->uChanged & LVIF_STATE && pNMLV->uOldState)
         {
             switch (pNMLV->uNewState & LVIS_STATEIMAGEMASK)
             {
             case 0x2000: /*checked*/
-                lw->lwRows[pNMLV->iItem]->bChecked = TRUE;
+                lw->lwRows[pNMLV->iItem].bChecked = TRUE;
                 break;
             case 0x1000: /*unchecked*/
-                lw->lwRows[pNMLV->iItem]->bChecked = FALSE;
+                lw->lwRows[pNMLV->iItem].bChecked = FALSE;
                 break;
             }
         }
@@ -92,24 +76,23 @@ BOOL ListViewOnNotify(ListView* lw, LPARAM lParam)
     {
         while (TRUE)
         {
-            dwSelected = ListView_GetNextItem(lw->hWnd, -1, LVNI_SELECTED);
+            lw->dwSelected = ListView_GetNextItem(lw->hWnd, -1, LVNI_SELECTED);
 
-            if (dwSelected == -1)
+            if (lw->dwSelected == -1)
                 return;
 
-            ListViewDeleteRow(lw, dwSelected);
+            ListViewDeleteRow(lw, lw->dwSelected);
         }
         break;
     }
 
     case NM_DBLCLK:
-
-        //PostMessage(GetParent(lw->hWnd), NF_MSG, IDC_LIST_ENTRIES /* Main list */, dwSelected);
+        DialogBoxParam(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_VIEW_ENTRY), lw->hWnd, ViewEntry, lw);
         break;
 
     case NM_RETURN:
 
-        ListView_EditLabel(lw->hWnd, dwSelected);
+        ListView_EditLabel(lw->hWnd, lw->dwSelected);
         break;
     }
 
