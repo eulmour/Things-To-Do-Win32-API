@@ -50,7 +50,7 @@ void ListViewSetColumns(ListView* lw, const DWORD cColumns, ListViewCol pColumns
 
         lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
         lvc.cx = pColumns[dwIndex].dwWidth;
-        lvc.pszText = pColumns[dwIndex].lpszName;
+        lvc.pszText = (LPTSTR)pColumns[dwIndex].lpszName;
 
         ListView_InsertColumn(lw->hWnd, dwIndex, &lvc);
     }
@@ -67,7 +67,7 @@ ListViewRow* ListViewCreateRow(ListView* lw, DWORD dwColor, BOOL bChecked, LPCTS
 
     for (BYTE i = 0; i < lw->cCols; i++)
     {
-        newRow->rgText[i].dwSize = _tcslen(rgText[i]);
+        newRow->rgText[i].dwSize = (DWORD)_tcslen(rgText[i]);
         size_t newSize = (newRow->rgText[i].dwSize + 1) * sizeof(TCHAR);
         
         newRow->rgText[i].lpszText = (LPCTSTR)malloc(newSize);

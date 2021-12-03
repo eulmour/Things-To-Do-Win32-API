@@ -1,6 +1,6 @@
 # Things To Do
 
-A lightweight sample application using C++ and the Win32 APIs.
+A lightweight sample application using C and the Win32 APIs.
 The goal was not to look for a task app anywhere but to create my own using lowest API possible on Windows.
 
 <p align="center">
